@@ -18,6 +18,9 @@ type Table struct {
 	IsActive     bool         `gorm:"default:true" json:"is_active"`
 	CreatedAt    time.Time    `json:"created_at"`
 	UpdatedAt    time.Time    `json:"updated_at"`
+
+	Restaurant *Restaurant `gorm:"foreignKey:RestaurantID" json:"restaurant,omitempty"`
+	Bookings   []Booking   `gorm:"foreignKey:TableID" json:"bookings,omitempty"`
 }
 
 type LocationType string

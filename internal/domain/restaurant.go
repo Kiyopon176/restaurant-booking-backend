@@ -27,9 +27,12 @@ type Restaurant struct {
 	CreatedAt           time.Time    `json:"created_at"`
 	UpdatedAt           time.Time    `json:"updated_at"`
 
-	Owner  *User             `gorm:"foreignKey:OwnerID" json:"owner,omitempty"`
-	Images []RestaurantImage `gorm:"foreignKey:RestaurantID" json:"images,omitempty"`
-	Tables []Table           `gorm:"foreignKey:RestaurantID" json:"tables,omitempty"`
+	Owner    *User               `gorm:"foreignKey:OwnerID" json:"owner,omitempty"`
+	Images   []RestaurantImage   `gorm:"foreignKey:RestaurantID" json:"images,omitempty"`
+	Tables   []Table             `gorm:"foreignKey:RestaurantID" json:"tables,omitempty"`
+	Bookings []Booking           `gorm:"foreignKey:RestaurantID" json:"bookings,omitempty"`
+	Reviews  []Review            `gorm:"foreignKey:RestaurantID" json:"reviews,omitempty"`
+	Managers []RestaurantManager `gorm:"foreignKey:RestaurantID" json:"managers,omitempty"`
 }
 
 type CuisineType string
