@@ -1,0 +1,1426 @@
+basePath: /
+definitions:
+  internal_handler.AvailabilityResponse:
+    properties:
+      available:
+        type: boolean
+      end_time:
+        type: string
+      start_time:
+        type: string
+      table_id:
+        type: string
+    type: object
+  internal_handler.CreateBookingRequest:
+    properties:
+      booking_date:
+        type: string
+      end_time:
+        type: string
+      guests_count:
+        minimum: 1
+        type: integer
+      restaurant_id:
+        type: string
+      special_note:
+        type: string
+      start_time:
+        type: string
+      table_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - booking_date
+    - end_time
+    - guests_count
+    - restaurant_id
+    - start_time
+    - table_id
+    - user_id
+    type: object
+  internal_handler.CreateRestaurantRequest:
+    properties:
+      address:
+        type: string
+      average_price:
+        type: integer
+      cuisine_type:
+        $ref: '#/definitions/restaurant-booking_internal_domain.CuisineType'
+      description:
+        type: string
+      instagram:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      max_combinable_tables:
+        type: integer
+      name:
+        type: string
+      owner_id:
+        type: string
+      phone:
+        type: string
+      website:
+        type: string
+      working_hours:
+        $ref: '#/definitions/restaurant-booking_internal_domain.WorkingHours'
+    required:
+    - address
+    - average_price
+    - cuisine_type
+    - max_combinable_tables
+    - name
+    - owner_id
+    - phone
+    - working_hours
+    type: object
+  internal_handler.CreateReviewRequest:
+    properties:
+      booking_id:
+        type: string
+      comment:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+      restaurant_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - rating
+    - restaurant_id
+    - user_id
+    type: object
+  internal_handler.CreateTableRequest:
+    properties:
+      location_type:
+        $ref: '#/definitions/restaurant-booking_internal_domain.LocationType'
+      max_capacity:
+        minimum: 1
+        type: integer
+      min_capacity:
+        minimum: 1
+        type: integer
+      restaurant_id:
+        type: string
+      table_number:
+        type: string
+      x_position:
+        type: integer
+      y_position:
+        type: integer
+    required:
+    - location_type
+    - max_capacity
+    - min_capacity
+    - restaurant_id
+    - table_number
+    type: object
+  internal_handler.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      role:
+        $ref: '#/definitions/restaurant-booking_internal_domain.UserRole'
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - phone
+    - role
+    type: object
+  internal_handler.ErrorResponse:
+    properties:
+      error:
+        example: invalid request
+        type: string
+    type: object
+  internal_handler.UpdateBookingStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/restaurant-booking_internal_domain.BookingStatus'
+    required:
+    - status
+    type: object
+  internal_handler.UpdateRestaurantRequest:
+    properties:
+      address:
+        type: string
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  internal_handler.UpdateReviewRequest:
+    properties:
+      comment:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    type: object
+  internal_handler.UpdateTableRequest:
+    properties:
+      is_active:
+        type: boolean
+      location_type:
+        $ref: '#/definitions/restaurant-booking_internal_domain.LocationType'
+      x_position:
+        type: integer
+      y_position:
+        type: integer
+    type: object
+  restaurant-booking_internal_domain.Booking:
+    properties:
+      booking_date:
+        type: string
+      created_at:
+        type: string
+      end_time:
+        type: string
+      guests_count:
+        type: integer
+      id:
+        type: string
+      restaurant:
+        $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+      restaurant_id:
+        type: string
+      special_note:
+        type: string
+      start_time:
+        type: string
+      status:
+        $ref: '#/definitions/restaurant-booking_internal_domain.BookingStatus'
+      table:
+        $ref: '#/definitions/restaurant-booking_internal_domain.Table'
+      table_id:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/restaurant-booking_internal_domain.User'
+      user_id:
+        type: string
+    type: object
+  restaurant-booking_internal_domain.BookingStatus:
+    enum:
+    - pending
+    - confirmed
+    - cancelled
+    - completed
+    - no_show
+    type: string
+    x-enum-varnames:
+    - BookingStatusPending
+    - BookingStatusConfirmed
+    - BookingStatusCancelled
+    - BookingStatusCompleted
+    - BookingStatusNoShow
+  restaurant-booking_internal_domain.CuisineType:
+    enum:
+    - Italian
+    - Chinese
+    - Mexican
+    - Japanese
+    - Indian
+    - French
+    - Kazakh
+    - Turkish
+    - Thai
+    - American
+    - Korean
+    - Cafe
+    - Bar
+    - Fast Food
+    - Vegetarian
+    - Other
+    type: string
+    x-enum-varnames:
+    - CuisineTypeItalian
+    - CuisineTypeChinese
+    - CuisineTypeMexican
+    - CuisineTypeJapanese
+    - CuisineTypeIndian
+    - CuisineTypeFrench
+    - CuisineTypeKazakh
+    - CuisineTypeTurkish
+    - CuisineTypeThai
+    - CuisineTypeAmerican
+    - CuisineTypeKorean
+    - CuisineTypeCafe
+    - CuisineTypeBar
+    - CuisineTypeFastFood
+    - CuisineTypeVegetarian
+    - CuisineTypeOther
+  restaurant-booking_internal_domain.DaySchedule:
+    properties:
+      close_time:
+        type: string
+      is_closed:
+        type: boolean
+      open_time:
+        type: string
+    type: object
+  restaurant-booking_internal_domain.LocationType:
+    enum:
+    - window
+    - vip
+    - regular
+    - outdoor
+    type: string
+    x-enum-varnames:
+    - LocationWindow
+    - LocationVIP
+    - LocationRegular
+    - LocationOutdoor
+  restaurant-booking_internal_domain.Restaurant:
+    properties:
+      address:
+        type: string
+      average_price:
+        type: integer
+      bookings:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+        type: array
+      created_at:
+        type: string
+      cuisine_type:
+        $ref: '#/definitions/restaurant-booking_internal_domain.CuisineType'
+      description:
+        type: string
+      id:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.RestaurantImage'
+        type: array
+      instagram:
+        type: string
+      is_active:
+        type: boolean
+      latitude:
+        type: number
+      longitude:
+        type: number
+      managers:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.RestaurantManager'
+        type: array
+      max_combinable_tables:
+        type: integer
+      name:
+        type: string
+      owner:
+        $ref: '#/definitions/restaurant-booking_internal_domain.User'
+      owner_id:
+        type: string
+      phone:
+        type: string
+      rating:
+        type: number
+      reviews:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.Review'
+        type: array
+      reviews_count:
+        type: integer
+      tables:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.Table'
+        type: array
+      updated_at:
+        type: string
+      website:
+        type: string
+      working_hours:
+        $ref: '#/definitions/restaurant-booking_internal_domain.WorkingHours'
+    type: object
+  restaurant-booking_internal_domain.RestaurantImage:
+    properties:
+      cloudinary_public_id:
+        type: string
+      cloudinary_url:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_main:
+        type: boolean
+      restaurant_id:
+        type: string
+    type: object
+  restaurant-booking_internal_domain.RestaurantManager:
+    properties:
+      assigned_at:
+        type: string
+      id:
+        type: string
+      restaurant:
+        $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+      restaurant_id:
+        type: string
+      user:
+        $ref: '#/definitions/restaurant-booking_internal_domain.User'
+      user_id:
+        type: string
+    type: object
+  restaurant-booking_internal_domain.Review:
+    properties:
+      booking:
+        $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+      booking_id:
+        type: string
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_visible:
+        type: boolean
+      rating:
+        type: integer
+      restaurant:
+        $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+      restaurant_id:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/restaurant-booking_internal_domain.User'
+      user_id:
+        type: string
+    type: object
+  restaurant-booking_internal_domain.Table:
+    properties:
+      bookings:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      location_type:
+        $ref: '#/definitions/restaurant-booking_internal_domain.LocationType'
+      max_capacity:
+        type: integer
+      min_capacity:
+        type: integer
+      restaurant:
+        $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+      restaurant_id:
+        type: string
+      table_number:
+        type: string
+      updated_at:
+        type: string
+      x_position:
+        type: integer
+      y_position:
+        type: integer
+    type: object
+  restaurant-booking_internal_domain.User:
+    properties:
+      avatar:
+        type: string
+      bookings:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+        type: array
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_login_at:
+        type: string
+      last_name:
+        type: string
+      managed_restaurants:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.RestaurantManager'
+        type: array
+      owned_restaurants:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+        type: array
+      phone:
+        type: string
+      reviews:
+        items:
+          $ref: '#/definitions/restaurant-booking_internal_domain.Review'
+        type: array
+      role:
+        $ref: '#/definitions/restaurant-booking_internal_domain.UserRole'
+      updated_at:
+        type: string
+    type: object
+  restaurant-booking_internal_domain.UserRole:
+    enum:
+    - customer
+    - owner
+    - manager
+    - admin
+    type: string
+    x-enum-varnames:
+    - UserRoleCustomer
+    - UserRoleOwner
+    - UserRoleManager
+    - UserRoleAdmin
+  restaurant-booking_internal_domain.WorkingHours:
+    additionalProperties:
+      $ref: '#/definitions/restaurant-booking_internal_domain.DaySchedule'
+    type: object
+host: localhost:8088
+info:
+  contact: {}
+  description: API для системы бронирования столиков в ресторанах
+  title: Restaurant Booking API
+  version: "1.0"
+paths:
+  /api/bookings:
+    post:
+      consumes:
+      - application/json
+      description: Создать новое бронирование столика в ресторане
+      parameters:
+      - description: Данные бронирования
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.CreateBookingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "409":
+          description: Столик недоступен
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Создать бронирование
+      tags:
+      - bookings
+  /api/bookings/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получить информацию о бронировании по ID
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить бронирование
+      tags:
+      - bookings
+  /api/bookings/{id}/cancel:
+    put:
+      consumes:
+      - application/json
+      description: Отменить бронирование (установить статус cancelled)
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Отменить бронирование
+      tags:
+      - bookings
+  /api/bookings/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Обновить статус бронирования (pending, confirmed, cancelled, completed,
+        no_show)
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новый статус
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.UpdateBookingStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Обновить статус бронирования
+      tags:
+      - bookings
+  /api/bookings/check-availability:
+    get:
+      consumes:
+      - application/json
+      description: Проверить, доступен ли столик для бронирования на указанное время
+      parameters:
+      - description: Table ID
+        in: query
+        name: table_id
+        required: true
+        type: string
+      - description: Время начала (RFC3339 format)
+        in: query
+        name: start_time
+        required: true
+        type: string
+      - description: Время окончания (RFC3339 format)
+        in: query
+        name: end_time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.AvailabilityResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Проверить доступность столика
+      tags:
+      - bookings
+  /api/restaurants:
+    get:
+      consumes:
+      - application/json
+      description: Получить список всех ресторанов с пагинацией
+      parameters:
+      - default: 10
+        description: Количество записей
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Список ресторанов
+      tags:
+      - restaurants
+    post:
+      consumes:
+      - application/json
+      description: Создать новый ресторан
+      parameters:
+      - description: Данные ресторана
+        in: body
+        name: restaurant
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.CreateRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Создать ресторан
+      tags:
+      - restaurants
+  /api/restaurants/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить ресторан по ID
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Удалить ресторан
+      tags:
+      - restaurants
+    get:
+      consumes:
+      - application/json
+      description: Получить информацию о ресторане по ID
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить ресторан
+      tags:
+      - restaurants
+    put:
+      consumes:
+      - application/json
+      description: Обновить информацию о ресторане
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные для обновления
+        in: body
+        name: restaurant
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.UpdateRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Обновить ресторан
+      tags:
+      - restaurants
+  /api/restaurants/{id}/bookings:
+    get:
+      consumes:
+      - application/json
+      description: Получить все бронирования ресторана на определенную дату
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Дата в формате YYYY-MM-DD
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить бронирования ресторана
+      tags:
+      - bookings
+  /api/restaurants/{id}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Получить все отзывы определенного ресторана с пагинацией
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: 10
+        description: Количество записей
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Review'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить отзывы ресторана
+      tags:
+      - reviews
+  /api/restaurants/{id}/tables:
+    get:
+      consumes:
+      - application/json
+      description: Получить все столы определенного ресторана
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Table'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить столы ресторана
+      tags:
+      - tables
+  /api/restaurants/search:
+    get:
+      consumes:
+      - application/json
+      description: Поиск ресторанов по фильтрам (рейтинг, тип кухни)
+      parameters:
+      - default: 10
+        description: Количество записей
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      - default: 0
+        description: Минимальный рейтинг
+        in: query
+        name: min_rating
+        type: number
+      - description: Тип кухни
+        in: query
+        name: cuisine_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Restaurant'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Поиск ресторанов
+      tags:
+      - restaurants
+  /api/reviews:
+    post:
+      consumes:
+      - application/json
+      description: Создать новый отзыв о ресторане
+      parameters:
+      - description: Данные отзыва
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.CreateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Review'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Создать отзыв
+      tags:
+      - reviews
+  /api/reviews/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить отзыв по ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Удалить отзыв
+      tags:
+      - reviews
+    get:
+      consumes:
+      - application/json
+      description: Получить информацию об отзыве по ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Review'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить отзыв
+      tags:
+      - reviews
+    put:
+      consumes:
+      - application/json
+      description: Обновить информацию об отзыве
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные для обновления
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.UpdateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Review'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Обновить отзыв
+      tags:
+      - reviews
+  /api/tables:
+    post:
+      consumes:
+      - application/json
+      description: Создать новый стол в ресторане
+      parameters:
+      - description: Данные стола
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.CreateTableRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Table'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Создать стол
+      tags:
+      - tables
+  /api/tables/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить стол по ID
+      parameters:
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Удалить стол
+      tags:
+      - tables
+    get:
+      consumes:
+      - application/json
+      description: Получить информацию о столе по ID
+      parameters:
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Table'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить стол
+      tags:
+      - tables
+    put:
+      consumes:
+      - application/json
+      description: Обновить информацию о столе
+      parameters:
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные для обновления
+        in: body
+        name: table
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.UpdateTableRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.Table'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Обновить стол
+      tags:
+      - tables
+  /api/tables/available:
+    get:
+      consumes:
+      - application/json
+      description: Получить доступные столы ресторана по минимальной вместимости
+      parameters:
+      - description: Restaurant ID
+        in: query
+        name: restaurant_id
+        required: true
+        type: string
+      - default: 1
+        description: Минимальная вместимость
+        in: query
+        name: min_capacity
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Table'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить доступные столы
+      tags:
+      - tables
+  /api/users:
+    get:
+      consumes:
+      - application/json
+      description: Получить список всех пользователей
+      parameters:
+      - default: 10
+        description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Оффсет
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Список пользователей
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Регистрация нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Создать пользователя
+      tags:
+      - users
+  /api/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получить информацию о пользователе по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/restaurant-booking_internal_domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить пользователя
+      tags:
+      - users
+  /api/users/{user_id}/bookings:
+    get:
+      consumes:
+      - application/json
+      description: Получить все бронирования определенного пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Booking'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить бронирования пользователя
+      tags:
+      - bookings
+  /api/users/{user_id}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Получить все отзывы определенного пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/restaurant-booking_internal_domain.Review'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Получить отзывы пользователя
+      tags:
+      - reviews
+schemes:
+- http
+swagger: "2.0"
