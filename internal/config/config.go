@@ -1,57 +1,65 @@
 package config
 
 import (
+	"errors"
 	"os"
-	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	DB     DatabaseConfig
-	Server ServerConfig
-	Auth   AuthConfig
-}
-
-type DatabaseConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	DBName   string
-	SSLMode  string
-}
-
-type ServerConfig struct {
-	Port string
-}
-
-type AuthConfig struct {
-	Secret     string
-	Expiration int
+	DBHost           string
+	DBPort           string
+	DBUser           string
+	DBPassword       string
+	DBName           string
+	JWTSecret        string
+	JWTAccessExpire  time.Duration
+	JWTRefreshExpire time.Duration
+	Port             string
 }
 
 func Load() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
+	// Load .env file (ignore error if not exists)
+	_ = godotenv.Load()
+
+	cfg := &Config{
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "postgres"),
+		DBName:     getEnv("DB_NAME", "restaurant_booking"),
+		JWTSecret:  getEnv("JWT_SECRET", ""),
+		Port:       getEnv("PORT", "8080"),
 	}
-	cfg := &Config{}
 
-	cfg.DB.Port = os.Getenv("DB_PORT")
-	cfg.DB.Host = os.Getenv("DB_HOST")
-	cfg.DB.User = os.Getenv("DB_USER")
-	cfg.DB.Password = os.Getenv("DB_PASSWORD")
-	cfg.DB.DBName = os.Getenv("DB_NAME")
-	cfg.DB.SSLMode = os.Getenv("DB_SSLMODE")
+	// Validate required fields
+	if cfg.JWTSecret == "" {
+		return nil, errors.New("JWT_SECRET is required")
+	}
 
-	cfg.Server.Port = os.Getenv("SERVER_PORT")
+	// Parse JWT expiration times
+	accessExpire := getEnv("JWT_ACCESS_EXPIRE", "15m")
+	refreshExpire := getEnv("JWT_REFRESH_EXPIRE", "7d")
 
-	cfg.Auth.Secret = os.Getenv("JWT_SECRET")
-	expiration, err := strconv.Atoi(os.Getenv("JWT_EXPIRATION"))
+	var err error
+	cfg.JWTAccessExpire, err = time.ParseDuration(accessExpire)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("invalid JWT_ACCESS_EXPIRE format")
 	}
-	cfg.Auth.Expiration = expiration
+
+	cfg.JWTRefreshExpire, err = time.ParseDuration(refreshExpire)
+	if err != nil {
+		return nil, errors.New("invalid JWT_REFRESH_EXPIRE format")
+	}
 
 	return cfg, nil
+}
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
