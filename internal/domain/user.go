@@ -1,15 +1,15 @@
 package domain
 
-import (
-	"github.com/google/uuid"
-	"time"
-)
+import "time"
 
 type User struct {
-	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	Username     string    `gorm:"not null" json:"username"`
-	Email        string    `gorm:"not null" json:"email"`
-	PasswordHash string    `gorm:"not null" json:"password_hash"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID        int64     `json:"id" db:"id"`
+	Email     string    `json:"email" db:"email"`
+	Password  string    `json:"password" db:"password"`
+	FirstName string    `json:"first_name" db:"first_name"`
+	LastName  string    `json:"last_name" db:"last_name"`
+	Phone     string    `json:"phone" db:"phone"`
+	Role      string    `json:"role" db:"role"`
+	CreatedAt time.Time `json:"create_at" db:"create_at"`
+	UpdatedAt time.Time `json:"update_at" db:"update_at"`
 }
