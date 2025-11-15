@@ -5,19 +5,19 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/Kiyopon176/restaurant-booking-backend/internal/domain"
 	"github.com/Kiyopon176/restaurant-booking-backend/internal/repository"
 )
 
 type PaymentService struct {
-	DB            *gorm.DB
+	DB            *sqlx.DB
 	PaymentRepo   repository.PaymentRepository
 	WalletService *WalletService
 }
 
-func NewPaymentService(db *gorm.DB, pr repository.PaymentRepository, ws *WalletService) *PaymentService {
+func NewPaymentService(db *sqlx.DB, pr repository.PaymentRepository, ws *WalletService) *PaymentService {
 	return &PaymentService{
 		DB:            db,
 		PaymentRepo:   pr,
@@ -49,7 +49,7 @@ func (s *PaymentService) CreatePayment(userID uuid.UUID, amount int, method doma
 }
 
 func (s *PaymentService) ProcessWalletPayment(paymentID uuid.UUID) error {
-	return s.DB.Transaction(func(tx *gorm.DB) error {
+	return s.DB.Transaction(func(tx *sqlx.Tx) error {
 		p, err := s.PaymentRepo.GetByID(tx, paymentID)
 		if err != nil {
 			return err
@@ -99,7 +99,7 @@ func (s *PaymentService) CreateKaspiPayment(paymentID uuid.UUID) (string, error)
 }
 
 func (s *PaymentService) ProcessExternalPaymentCallback(externalPaymentID string, success bool) error {
-	return s.DB.Transaction(func(tx *gorm.DB) error {
+	return s.DB.Transaction(func(tx *sqlx.Tx) error {
 		p, err := s.PaymentRepo.GetByExternalID(tx, externalPaymentID)
 		if err != nil {
 			return err
@@ -137,7 +137,7 @@ func (s *PaymentService) ProcessExternalPaymentCallback(externalPaymentID string
 }
 
 func (s *PaymentService) RefundPayment(paymentID uuid.UUID) error {
-	return s.DB.Transaction(func(tx *gorm.DB) error {
+	return s.DB.Transaction(func(tx *sqlx.Tx) error {
 		p, err := s.PaymentRepo.GetByID(tx, paymentID)
 		if err != nil {
 			return err

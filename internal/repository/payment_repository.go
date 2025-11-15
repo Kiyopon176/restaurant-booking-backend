@@ -5,50 +5,63 @@ import (
 
 	"github.com/Kiyopon176/restaurant-booking-backend/internal/domain"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"github.com/jmoiron/sqlx"
 )
 
 type PaymentRepository interface {
-	Create(tx *gorm.DB, p *domain.Payment) error
-	GetByID(tx *gorm.DB, id uuid.UUID) (*domain.Payment, error)
-	GetByExternalID(tx *gorm.DB, externalID string) (*domain.Payment, error)
-	Update(tx *gorm.DB, p *domain.Payment) error
-	GetByUserID(tx *gorm.DB, userID uuid.UUID, pagination Pagination) ([]domain.Payment, int64, error)
+	Create(tx *sqlx.Tx, p *domain.Payment) error
+	GetByID(tx *sqlx.Tx, id uuid.UUID) (*domain.Payment, error)
+	GetByExternalID(tx *sqlx.Tx, externalID string) (*domain.Payment, error)
+	Update(tx *sqlx.Tx, p *domain.Payment) error
+	GetByUserID(tx *sqlx.Tx, userID uuid.UUID, pagination Pagination) ([]domain.Payment, int64, error)
 }
 
 type paymentRepo struct {
-	db *gorm.DB
+	db *sqlx.DB
 }
 
-func NewPaymentRepository(db *gorm.DB) PaymentRepository {
+func NewPaymentRepository(db *sqlx.DB) PaymentRepository {
 	return &paymentRepo{db: db}
 }
 
-func (r *paymentRepo) Create(tx *gorm.DB, p *domain.Payment) error {
-	if tx == nil {
-		tx = r.db
+func (r *paymentRepo) exec(tx *sqlx.Tx) sqlx.Ext {
+	if tx != nil {
+		return tx
 	}
-	return tx.Create(p).Error
+	return r.db
 }
 
-func (r *paymentRepo) GetByID(tx *gorm.DB, id uuid.UUID) (*domain.Payment, error) {
-	if tx == nil {
-		tx = r.db
-	}
+func (r *paymentRepo) Create(tx *sqlx.Tx, p *domain.Payment) error {
+	q := `
+		INSERT INTO payments (
+			id, user_id, booking_id, amount, payment_method, payment_status,
+			external_payment_id, external_payment_url, error_message, created_at, updated_at
+		)
+		VALUES (
+			:id, :user_id, :booking_id, :amount, :payment_method, :payment_status,
+			:external_payment_id, :external_payment_url, :error_message, NOW(), NOW()
+		)
+	`
+	_, err := sqlx.NamedExec(r.exec(tx), q, p)
+	return err
+}
+
+func (r *paymentRepo) GetByID(tx *sqlx.Tx, id uuid.UUID) (*domain.Payment, error) {
 	var p domain.Payment
-	if err := tx.Where("id = ?", id).First(&p).Error; err != nil {
+	q := `SELECT * FROM payments WHERE id = $1 LIMIT 1`
+	err := sqlx.Get(r.exec(tx), &p, q, id)
+	if err != nil {
 		return nil, err
 	}
 	return &p, nil
 }
 
-func (r *paymentRepo) GetByExternalID(tx *gorm.DB, externalID string) (*domain.Payment, error) {
-	if tx == nil {
-		tx = r.db
-	}
+func (r *paymentRepo) GetByExternalID(tx *sqlx.Tx, externalID string) (*domain.Payment, error) {
 	var p domain.Payment
-	if err := tx.Where("external_payment_id = ?", externalID).First(&p).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+	q := `SELECT * FROM payments WHERE external_payment_id = $1 LIMIT 1`
+	err := sqlx.Get(r.exec(tx), &p, q, externalID)
+	if err != nil {
+		if errors.Is(err, sqlx.ErrNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -56,23 +69,39 @@ func (r *paymentRepo) GetByExternalID(tx *gorm.DB, externalID string) (*domain.P
 	return &p, nil
 }
 
-func (r *paymentRepo) Update(tx *gorm.DB, p *domain.Payment) error {
-	if tx == nil {
-		tx = r.db
-	}
-	return tx.Save(p).Error
+func (r *paymentRepo) Update(tx *sqlx.Tx, p *domain.Payment) error {
+	q := `
+		UPDATE payments SET
+			user_id = :user_id,
+			booking_id = :booking_id,
+			amount = :amount,
+			payment_method = :payment_method,
+			payment_status = :payment_status,
+			external_payment_id = :external_payment_id,
+			external_payment_url = :external_payment_url,
+			error_message = :error_message,
+			updated_at = NOW()
+		WHERE id = :id
+	`
+	_, err := sqlx.NamedExec(r.exec(tx), q, p)
+	return err
 }
 
-func (r *paymentRepo) GetByUserID(tx *gorm.DB, userID uuid.UUID, pagination Pagination) ([]domain.Payment, int64, error) {
-	if tx == nil {
-		tx = r.db
-	}
-	var payments []domain.Payment
+func (r *paymentRepo) GetByUserID(tx *sqlx.Tx, userID uuid.UUID, pagination Pagination) ([]domain.Payment, int64, error) {
 	var total int64
-	query := tx.Where("user_id = ?", userID)
-	query.Count(&total)
-	if err := query.Offset(pagination.Offset()).Limit(pagination.Limit()).Find(&payments).Error; err != nil {
+	r.exec(tx).QueryRow(`SELECT COUNT(*) FROM payments WHERE user_id = $1`, userID).Scan(&total)
+
+	var list []domain.Payment
+	q := `
+		SELECT * FROM payments
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3
+	`
+	err := sqlx.Select(r.exec(tx), &list, q, userID, pagination.Limit(), pagination.Offset())
+	if err != nil {
 		return nil, 0, err
 	}
-	return payments, total, nil
+
+	return list, total, nil
 }
