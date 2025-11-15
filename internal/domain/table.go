@@ -1,18 +1,43 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Table struct {
-	ID            int64     `json:"id" db:"id"`
-	RestaurantID  int64     `json:"restaurant_id" db:"restaurant_id"`
-	TableNumber   int       `json:"table_number" db:"table_number"`
-	MinCapacity   int       `json:"min_capacity" db:"min_capacity"`
-	MaxCapacity   int       `json:"max_capacity" db:"max_capacity"`
-	LocationType  string    `json:"location_type" db:"location_type"`
-	IsAvailable   bool      `json:"is_available" db:"is_available"`
-	IsActive      bool      `json:"is_active" db:"is_active"`
-	MaxCombinable int       `json:"max_combinable_tables" db:"max_combinable_tables"`
-	Notes         string    `json:"notes" db:"notes"`
-	CreatedAt     time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
+	ID           uuid.UUID    `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	RestaurantID uuid.UUID    `gorm:"type:uuid;not null" json:"restaurant_id"`
+	TableNumber  string       `gorm:"not null" json:"table_number"`
+	MinCapacity  int          `gorm:"not null" json:"min_capacity"`
+	MaxCapacity  int          `gorm:"not null" json:"max_capacity"`
+	LocationType LocationType `gorm:"type:location_type;not null;default:'regular'" json:"location_type"`
+	XPosition    *int         `json:"x_position,omitempty"`
+	YPosition    *int         `json:"y_position,omitempty"`
+	IsActive     bool         `gorm:"default:true" json:"is_active"`
+	CreatedAt    time.Time    `json:"created_at"`
+	UpdatedAt    time.Time    `json:"updated_at"`
+
+	Restaurant *Restaurant `gorm:"foreignKey:RestaurantID" json:"restaurant,omitempty"`
+	Bookings   []Booking   `gorm:"foreignKey:TableID" json:"bookings,omitempty"`
+}
+
+type LocationType string
+
+const (
+	LocationWindow  LocationType = "window"
+	LocationVIP     LocationType = "vip"
+	LocationRegular LocationType = "regular"
+	LocationOutdoor LocationType = "outdoor"
+)
+
+type RestaurantManager struct {
+	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	UserID       uuid.UUID `gorm:"type:uuid;not null" json:"user_id"`
+	RestaurantID uuid.UUID `gorm:"type:uuid;not null" json:"restaurant_id"`
+	AssignedAt   time.Time `json:"assigned_at"`
+
+	User       *User       `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Restaurant *Restaurant `gorm:"foreignKey:RestaurantID" json:"restaurant,omitempty"`
 }
