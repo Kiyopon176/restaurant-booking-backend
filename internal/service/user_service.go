@@ -16,7 +16,7 @@ var (
 
 type UserService interface {
 	GetUserByID(id uuid.UUID) (*domain.User, error)
-	UpdateUser(id uuid.UUID, name string, phone *string) (*domain.User, error)
+	UpdateUser(id uuid.UUID, firstName, lastName, phone string) (*domain.User, error)
 	ChangePassword(id uuid.UUID, oldPassword, newPassword string) error
 }
 
@@ -41,7 +41,7 @@ func (s *userService) GetUserByID(id uuid.UUID) (*domain.User, error) {
 	return user, nil
 }
 
-func (s *userService) UpdateUser(id uuid.UUID, name string, phone *string) (*domain.User, error) {
+func (s *userService) UpdateUser(id uuid.UUID, firstName, lastName, phone string) (*domain.User, error) {
 	user, err := s.userRepo.GetByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -50,7 +50,8 @@ func (s *userService) UpdateUser(id uuid.UUID, name string, phone *string) (*dom
 		return nil, err
 	}
 
-	user.Name = name
+	user.FirstName = firstName
+	user.LastName = lastName
 	user.Phone = phone
 
 	if err := s.userRepo.Update(user); err != nil {
@@ -70,7 +71,7 @@ func (s *userService) ChangePassword(id uuid.UUID, oldPassword, newPassword stri
 	}
 
 	// Verify old password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(oldPassword)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
 		return ErrOldPasswordIncorrect
 	}
 
@@ -85,7 +86,7 @@ func (s *userService) ChangePassword(id uuid.UUID, oldPassword, newPassword stri
 		return err
 	}
 
-	user.PasswordHash = string(hashedPassword)
+	user.Password = string(hashedPassword)
 
 	return s.userRepo.Update(user)
 }

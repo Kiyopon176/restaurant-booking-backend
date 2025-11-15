@@ -26,11 +26,12 @@ func NewAuthHandler(authService service.AuthService, userService service.UserSer
 }
 
 type RegisterRequest struct {
-	Email    string          `json:"email" binding:"required"`
-	Password string          `json:"password" binding:"required"`
-	Name     string          `json:"name" binding:"required"`
-	Phone    *string         `json:"phone"`
-	Role     domain.UserRole `json:"role" binding:"required"`
+	Email     string          `json:"email" binding:"required"`
+	Password  string          `json:"password" binding:"required"`
+	FirstName string          `json:"first_name" binding:"required"`
+	LastName  string          `json:"last_name" binding:"required"`
+	Phone     string          `json:"phone" binding:"required"`
+	Role      domain.UserRole `json:"role" binding:"required"`
 }
 
 type LoginRequest struct {
@@ -55,8 +56,9 @@ type AuthResponse struct {
 type UserResponse struct {
 	ID        uuid.UUID       `json:"id"`
 	Email     string          `json:"email"`
-	Name      string          `json:"name"`
-	Phone     *string         `json:"phone,omitempty"`
+	FirstName string          `json:"first_name"`
+	LastName  string          `json:"last_name"`
+	Phone     string          `json:"phone"`
 	Role      domain.UserRole `json:"role"`
 	CreatedAt string          `json:"created_at"`
 }
@@ -70,9 +72,6 @@ type MessageResponse struct {
 	Message string `json:"message"`
 }
 
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
 
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
@@ -84,7 +83,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	user, accessToken, refreshToken, err := h.authService.Register(
 		req.Email,
 		req.Password,
-		req.Name,
+		req.FirstName,
+		req.LastName,
 		req.Phone,
 		req.Role,
 	)
@@ -209,7 +209,8 @@ func toUserResponse(user *domain.User) *UserResponse {
 	return &UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
-		Name:      user.Name,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 		Phone:     user.Phone,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/migrations/000001_create_enums.down.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000001_create_enums.up.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000002_create_users_table.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000002_create_users_table.up.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000003_create_restaurants.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000004_create_restaurant_images_table.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000005_create_tables_table.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000006_create_bookings_table.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000007_create_reviews_table.down.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/migrations/000008_create_restaurant_managers_tables.down.sql" dialect="PostgreSQL" />
+    <file url="PROJECT" dialect="PostgreSQL" />
+  </component>
+</project>

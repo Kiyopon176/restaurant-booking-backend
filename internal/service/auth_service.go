@@ -24,7 +24,7 @@ var (
 )
 
 type AuthService interface {
-	Register(email, password, name string, phone *string, role domain.UserRole) (*domain.User, string, string, error)
+	Register(email, password, firstName, lastName string, phone string, role domain.UserRole) (*domain.User, string, string, error)
 	Login(email, password string) (string, string, *domain.User, error)
 	RefreshToken(refreshToken string) (string, string, error)
 	Logout(refreshToken string) error
@@ -48,7 +48,7 @@ func NewAuthService(
 	}
 }
 
-func (s *authService) Register(email, password, name string, phone *string, role domain.UserRole) (*domain.User, string, string, error) {
+func (s *authService) Register(email, password, firstName, lastName string, phone string, role domain.UserRole) (*domain.User, string, string, error) {
 	// Validate email format
 	if !isValidEmail(email) {
 		return nil, "", "", ErrInvalidEmail
@@ -76,14 +76,16 @@ func (s *authService) Register(email, password, name string, phone *string, role
 
 	// Create user
 	user := &domain.User{
-		ID:           uuid.New(),
-		Email:        email,
-		PasswordHash: string(hashedPassword),
-		Name:         name,
-		Phone:        phone,
-		Role:         role,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+		ID:        uuid.New(),
+		Email:     email,
+		Password:  string(hashedPassword),
+		FirstName: firstName,
+		LastName:  lastName,
+		Phone:     phone,
+		Role:      role,
+		IsActive:  true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	if err := s.userRepo.Create(user); err != nil {
@@ -128,7 +130,7 @@ func (s *authService) Login(email, password string) (string, string, *domain.Use
 	}
 
 	// Check password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return "", "", nil, ErrInvalidCredentials
 	}
 

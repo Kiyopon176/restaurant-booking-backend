@@ -11,7 +11,6 @@ type UserRepository interface {
 	Create(user *domain.User) error
 	GetByID(id uuid.UUID) (*domain.User, error)
 	GetByEmail(email string) (*domain.User, error)
-	GetByOAuth(provider domain.OAuthProvider, oauthID string) (*domain.User, error)
 	Update(user *domain.User) error
 	Delete(id uuid.UUID) error
 }
@@ -39,14 +38,6 @@ func (r *userRepository) GetByID(id uuid.UUID) (*domain.User, error) {
 func (r *userRepository) GetByEmail(email string) (*domain.User, error) {
 	var user domain.User
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
-func (r *userRepository) GetByOAuth(provider domain.OAuthProvider, oauthID string) (*domain.User, error) {
-	var user domain.User
-	if err := r.db.Where("oauth_provider = ? AND oauth_id = ?", provider, oauthID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
