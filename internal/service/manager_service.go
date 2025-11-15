@@ -14,7 +14,6 @@ import (
 var (
 	ErrManagerAlreadyExists = errors.New("user is already a manager for this restaurant")
 	ErrManagerNotFound      = errors.New("manager not found")
-	ErrUserNotFound         = errors.New("user not found")
 )
 
 type AddManagerRequest struct {
@@ -58,7 +57,7 @@ func (s *managerService) AddManager(ctx context.Context, restaurantID uuid.UUID,
 	if restaurant.OwnerID != ownerID {
 		return nil, ErrUnauthorized
 	}
-	user, err := s.userRepo.GetByID(ctx, req.UserID)
+	user, err := s.userRepo.GetByID(req.UserID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound

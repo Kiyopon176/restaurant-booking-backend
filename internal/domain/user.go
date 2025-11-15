@@ -34,3 +34,16 @@ const (
 	UserRoleManager  UserRole = "manager"
 	UserRoleAdmin    UserRole = "admin"
 )
+
+// RefreshToken represents a refresh token for authentication
+type RefreshToken struct {
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null" json:"user_id"`
+	Token     string    `gorm:"uniqueIndex;not null" json:"token"`
+	ExpiresAt time.Time `gorm:"not null" json:"expires_at"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (RefreshToken) TableName() string {
+	return "refresh_tokens"
+}

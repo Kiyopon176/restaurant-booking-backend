@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
@@ -45,7 +44,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		Role:      req.Role,
 	}
 
-	if err := h.userRepo.Create(c.Request.Context(), user); err != nil {
+	if err := h.userRepo.Create(user); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -74,7 +73,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userRepo.GetByID(c.Request.Context(), id)
+	user, err := h.userRepo.GetByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{Error: "user not found"})
 		return
@@ -96,6 +95,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // @Success      200 {array} domain.User
 // @Failure      500 {object} ErrorResponse
 // @Router       /api/users [get]
+/*
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	limit := 10
 	offset := 0
@@ -119,6 +119,7 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, users)
 }
+*/
 
 type CreateUserRequest struct {
 	Email     string          `json:"email" binding:"required,email"`
