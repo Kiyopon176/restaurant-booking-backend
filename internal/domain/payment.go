@@ -7,19 +7,19 @@ import (
 )
 
 type Payment struct {
-	ID                 uuid.UUID     `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	UserID             uuid.UUID     `gorm:"type:uuid;not null" json:"user_id"`
-	BookingID          *uuid.UUID    `gorm:"type:uuid" json:"booking_id,omitempty"`
-	Amount             int           `gorm:"not null" json:"amount"`
-	PaymentMethod      PaymentMethod `gorm:"type:payment_method;not null" json:"payment_method"`
-	PaymentStatus      PaymentStatus `gorm:"type:payment_status;not null;default:'pending'" json:"payment_status"`
-	ExternalPaymentID  *string       `json:"external_payment_id,omitempty"`
-	ExternalPaymentURL *string       `gorm:"type:text" json:"external_payment_url,omitempty"`
-	ErrorMessage       *string       `gorm:"type:text" json:"error_message,omitempty"`
-	CreatedAt          time.Time     `json:"created_at"`
-	UpdatedAt          time.Time     `json:"updated_at"`
+	ID                 uuid.UUID     `db:"id" json:"id"`
+	UserID             uuid.UUID     `db:"user_id" json:"user_id"`
+	BookingID          *uuid.UUID    `db:"booking_id" json:"booking_id,omitempty"`
+	Amount             int           `db:"amount" json:"amount"`
+	PaymentMethod      PaymentMethod `db:"payment_method" json:"payment_method"`
+	PaymentStatus      PaymentStatus `db:"payment_status" json:"payment_status"`
+	ExternalPaymentID  *string       `db:"external_payment_id" json:"external_payment_id,omitempty"`
+	ExternalPaymentURL *string       `db:"external_payment_url" json:"external_payment_url,omitempty"`
+	ErrorMessage       *string       `db:"error_message" json:"error_message,omitempty"`
+	CreatedAt          time.Time     `db:"created_at" json:"created_at"`
+	UpdatedAt          time.Time     `db:"updated_at" json:"updated_at"`
 
-	User *User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	User *User `json:"user,omitempty"`
 }
 
 type PaymentMethod string
