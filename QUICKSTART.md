@@ -1,37 +1,80 @@
 # 🚀 Быстрый старт
 
-## 1. Запустите PostgreSQL
-Убедитесь что PostgreSQL запущен на порту 5432
+## Запуск через Docker (рекомендуется)
+1) Подготовьте `.env` (пример значений):
+```
+DB_HOST=db
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=dastarkhan_db
+JWT_SECRET=replace_with_strong_secret
+JWT_ACCESS_EXPIRE=15m
+JWT_REFRESH_EXPIRE=168h
+PORT=8080
+PGADMIN_EMAIL=admin@example.com
+PGADMIN_PASSWORD=admin123
+```
+2) Соберите и поднимите контейнеры:
+```powershell
+docker compose build api
+docker compose up -d
+docker compose logs -n 80 api
+```
+3) Проверки:
+- API: `http://localhost:8080/health`
+- Swagger: `http://localhost:8080/swagger/index.html`
+- pgAdmin: `http://localhost:5050` (сервер: host `db`, user `DB_USER`, password `DB_PASSWORD`)
 
-## 2. Создайте базу данных (если нужно)
+Остановить/очистить:
+```powershell
+docker compose down
+docker compose down -v  # полный сброс БД
+```
+
+## Локальный запуск (без Docker)
+1) Установите PostgreSQL и создайте БД:
 ```sql
 CREATE DATABASE dastarkhan_db;
 ```
-
-## 3. Запустите сервер
-```bash
+2) Подготовьте `.env` (локально):
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=dastarkhan_db
+JWT_SECRET=replace_with_strong_secret
+JWT_ACCESS_EXPIRE=15m
+JWT_REFRESH_EXPIRE=168h
+PORT=8080
+```
+3) Запустите API:
+```powershell
 go run cmd/api/main.go
 ```
 
-## 4. Запустите тесты (в новом терминале)
-```powershell
-.\test-api.ps1
-```
-
-## Быстрая проверка через curl
+## Быстрая проверка API
 
 ### Регистрация
 ```bash
 curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"test@test.com\",\"password\":\"pass12345\",\"name\":\"Test\",\"role\":\"client\"}"
+  -d '{
+    "email": "test@test.com",
+    "password": "P@ssw0rd!",
+    "first_name": "Test",
+    "last_name": "User",
+    "phone": "1234567890",
+    "role": "customer"
+  }'
 ```
 
 ### Логин
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"test@test.com\",\"password\":\"pass12345\"}"
+  -d '{"email":"test@test.com","password":"P@ssw0rd!"}'
 ```
 
 Сохраните `access_token` из ответа.
