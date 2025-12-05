@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateBookingRequest"
+                            "$ref": "#/definitions/handler.CreateBookingRequest"
                         }
                     }
                 ],
@@ -43,25 +43,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                            "$ref": "#/definitions/domain.Booking"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Столик недоступен",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -107,19 +107,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.AvailabilityResponse"
+                            "$ref": "#/definitions/handler.AvailabilityResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -151,19 +151,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                            "$ref": "#/definitions/domain.Booking"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -195,25 +195,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                            "$ref": "#/definitions/domain.Booking"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -246,7 +246,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.UpdateBookingStatusRequest"
+                            "$ref": "#/definitions/handler.UpdateBookingStatusRequest"
                         }
                     }
                 ],
@@ -254,25 +254,336 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                            "$ref": "#/definitions/domain.Booking"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payments": {
+            "get": {
+                "description": "Получить историю платежей пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Получить платежи пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Payment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payments/halyk": {
+            "post": {
+                "description": "Создать платеж через Halyk Bank",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Создать платеж через Halyk",
+                "parameters": [
+                    {
+                        "description": "Данные платежа",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PaymentWithURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payments/kaspi": {
+            "post": {
+                "description": "Создать платеж через Kaspi",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Создать платеж через Kaspi",
+                "parameters": [
+                    {
+                        "description": "Данные платежа",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PaymentWithURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payments/wallet": {
+            "post": {
+                "description": "Создать и обработать платеж через кошелек",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Создать платеж через кошелек",
+                "parameters": [
+                    {
+                        "description": "Данные платежа",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Payment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payments/webhook/halyk": {
+            "post": {
+                "description": "Обработка callback от Halyk Bank",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Webhook для Halyk Bank",
+                "parameters": [
+                    {
+                        "description": "Webhook данные",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.WebhookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payments/webhook/kaspi": {
+            "post": {
+                "description": "Обработка callback от Kaspi",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Webhook для Kaspi",
+                "parameters": [
+                    {
+                        "description": "Webhook данные",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.WebhookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payments/{id}/refund": {
+            "post": {
+                "description": "Вернуть средства за платеж",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Вернуть платеж",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -313,14 +624,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                                "$ref": "#/definitions/domain.Restaurant"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -344,7 +655,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateRestaurantRequest"
+                            "$ref": "#/definitions/handler.CreateRestaurantRequest"
                         }
                     }
                 ],
@@ -352,80 +663,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                            "$ref": "#/definitions/domain.Restaurant"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/search": {
-            "get": {
-                "description": "Поиск ресторанов по фильтрам (рейтинг, тип кухни)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Поиск ресторанов",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Количество записей",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Смещение",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "default": 0,
-                        "description": "Минимальный рейтинг",
-                        "name": "min_rating",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Тип кухни",
-                        "name": "cuisine_type",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -457,19 +707,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                            "$ref": "#/definitions/domain.Restaurant"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -495,12 +745,19 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "description": "Данные для обновления",
                         "name": "restaurant",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.UpdateRestaurantRequest"
+                            "$ref": "#/definitions/handler.UpdateRestaurantRequest"
                         }
                     }
                 ],
@@ -508,31 +765,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                            "$ref": "#/definitions/domain.Restaurant"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Удалить ресторан по ID",
+                "description": "Удалить ресторан по ID (устанавливает is_active = false)",
                 "consumes": [
                     "application/json"
                 ],
@@ -542,13 +805,20 @@ const docTemplate = `{
                 "tags": [
                     "restaurants"
                 ],
-                "summary": "Удалить ресторан",
+                "summary": "Удалить ресторан (soft delete)",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Restaurant ID",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -559,13 +829,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -606,20 +882,360 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                                "$ref": "#/definitions/domain.Booking"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants/{id}/images": {
+            "post": {
+                "description": "Загрузить изображение для ресторана (mock upload)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "restaurants"
+                ],
+                "summary": "Добавить изображение к ресторану",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Файл изображения",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Является ли главным изображением",
+                        "name": "is_main",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.RestaurantImage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants/{id}/images/{image_id}": {
+            "delete": {
+                "description": "Удалить изображение ресторана по ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "restaurants"
+                ],
+                "summary": "Удалить изображение ресторана",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Image ID",
+                        "name": "image_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants/{id}/managers": {
+            "get": {
+                "description": "Получить всех менеджеров ресторана",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "managers"
+                ],
+                "summary": "Получить список менеджеров ресторана",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.RestaurantManager"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Добавить пользователя в качестве менеджера ресторана (только владелец)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "managers"
+                ],
+                "summary": "Добавить менеджера к ресторану",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные менеджера",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.AddManagerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.RestaurantManager"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants/{id}/managers/{user_id}": {
+            "delete": {
+                "description": "Удалить менеджера из ресторана (только владелец)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "managers"
+                ],
+                "summary": "Удалить менеджера из ресторана",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -667,20 +1283,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Review"
+                                "$ref": "#/definitions/domain.Review"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -714,20 +1330,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Table"
+                                "$ref": "#/definitions/domain.Table"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -753,7 +1369,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateReviewRequest"
+                            "$ref": "#/definitions/handler.CreateReviewRequest"
                         }
                     }
                 ],
@@ -761,19 +1377,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Review"
+                            "$ref": "#/definitions/domain.Review"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -805,19 +1421,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Review"
+                            "$ref": "#/definitions/domain.Review"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -848,7 +1464,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.UpdateReviewRequest"
+                            "$ref": "#/definitions/handler.UpdateReviewRequest"
                         }
                     }
                 ],
@@ -856,25 +1472,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Review"
+                            "$ref": "#/definitions/domain.Review"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -907,13 +1523,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -939,7 +1555,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateTableRequest"
+                            "$ref": "#/definitions/handler.CreateTableRequest"
                         }
                     }
                 ],
@@ -947,19 +1563,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Table"
+                            "$ref": "#/definitions/domain.Table"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1000,20 +1616,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Table"
+                                "$ref": "#/definitions/domain.Table"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1045,19 +1661,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Table"
+                            "$ref": "#/definitions/domain.Table"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1088,7 +1704,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.UpdateTableRequest"
+                            "$ref": "#/definitions/handler.UpdateTableRequest"
                         }
                     }
                 ],
@@ -1096,25 +1712,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.Table"
+                            "$ref": "#/definitions/domain.Table"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1147,65 +1763,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
             }
         },
         "/api/users": {
-            "get": {
-                "description": "Получить список всех пользователей",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Список пользователей",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Лимит",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Оффсет",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.User"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Регистрация нового пользователя",
                 "consumes": [
@@ -1225,7 +1795,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.CreateUserRequest"
+                            "$ref": "#/definitions/handler.CreateUserRequest"
                         }
                     }
                 ],
@@ -1233,19 +1803,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.User"
+                            "$ref": "#/definitions/domain.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1277,19 +1847,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/restaurant-booking_internal_domain.User"
+                            "$ref": "#/definitions/domain.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1323,20 +1893,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                                "$ref": "#/definitions/domain.Booking"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1370,20 +1940,217 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/restaurant-booking_internal_domain.Review"
+                                "$ref": "#/definitions/domain.Review"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/wallet": {
+            "get": {
+                "description": "Получить информацию о кошельке пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "summary": "Получить кошелек",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Wallet"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/wallet/deposit": {
+            "post": {
+                "description": "Пополнить баланс кошелька пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "summary": "Пополнить кошелек",
+                "parameters": [
+                    {
+                        "description": "Данные для пополнения",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.DepositRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Wallet"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/wallet/transactions": {
+            "get": {
+                "description": "Получить историю транзакций кошелька",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "summary": "Получить историю транзакций",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.WalletTransaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/wallet/withdraw": {
+            "post": {
+                "description": "Вывести средства из кошелька пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "summary": "Вывести средства из кошелька",
+                "parameters": [
+                    {
+                        "description": "Данные для вывода",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.WithdrawRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Wallet"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -1391,281 +2158,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal_handler.AvailabilityResponse": {
-            "type": "object",
-            "properties": {
-                "available": {
-                    "type": "boolean"
-                },
-                "end_time": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "string"
-                },
-                "table_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_handler.CreateBookingRequest": {
-            "type": "object",
-            "required": [
-                "booking_date",
-                "end_time",
-                "guests_count",
-                "restaurant_id",
-                "start_time",
-                "table_id",
-                "user_id"
-            ],
-            "properties": {
-                "booking_date": {
-                    "type": "string"
-                },
-                "end_time": {
-                    "type": "string"
-                },
-                "guests_count": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "restaurant_id": {
-                    "type": "string"
-                },
-                "special_note": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "string"
-                },
-                "table_id": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_handler.CreateRestaurantRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "average_price",
-                "cuisine_type",
-                "max_combinable_tables",
-                "name",
-                "owner_id",
-                "phone",
-                "working_hours"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "average_price": {
-                    "type": "integer"
-                },
-                "cuisine_type": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.CuisineType"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "instagram": {
-                    "type": "string"
-                },
-                "latitude": {
-                    "type": "number"
-                },
-                "longitude": {
-                    "type": "number"
-                },
-                "max_combinable_tables": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "website": {
-                    "type": "string"
-                },
-                "working_hours": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.WorkingHours"
-                }
-            }
-        },
-        "internal_handler.CreateReviewRequest": {
-            "type": "object",
-            "required": [
-                "rating",
-                "restaurant_id",
-                "user_id"
-            ],
-            "properties": {
-                "booking_id": {
-                    "type": "string"
-                },
-                "comment": {
-                    "type": "string"
-                },
-                "rating": {
-                    "type": "integer",
-                    "maximum": 5,
-                    "minimum": 1
-                },
-                "restaurant_id": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_handler.CreateTableRequest": {
-            "type": "object",
-            "required": [
-                "location_type",
-                "max_capacity",
-                "min_capacity",
-                "restaurant_id",
-                "table_number"
-            ],
-            "properties": {
-                "location_type": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.LocationType"
-                },
-                "max_capacity": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "min_capacity": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "restaurant_id": {
-                    "type": "string"
-                },
-                "table_number": {
-                    "type": "string"
-                },
-                "x_position": {
-                    "type": "integer"
-                },
-                "y_position": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_handler.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "first_name",
-                "last_name",
-                "password",
-                "phone",
-                "role"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "role": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.UserRole"
-                }
-            }
-        },
-        "internal_handler.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "invalid request"
-                }
-            }
-        },
-        "internal_handler.UpdateBookingStatusRequest": {
-            "type": "object",
-            "required": [
-                "status"
-            ],
-            "properties": {
-                "status": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.BookingStatus"
-                }
-            }
-        },
-        "internal_handler.UpdateRestaurantRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_handler.UpdateReviewRequest": {
-            "type": "object",
-            "properties": {
-                "comment": {
-                    "type": "string"
-                },
-                "rating": {
-                    "type": "integer",
-                    "maximum": 5,
-                    "minimum": 1
-                }
-            }
-        },
-        "internal_handler.UpdateTableRequest": {
-            "type": "object",
-            "properties": {
-                "is_active": {
-                    "type": "boolean"
-                },
-                "location_type": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.LocationType"
-                },
-                "x_position": {
-                    "type": "integer"
-                },
-                "y_position": {
-                    "type": "integer"
-                }
-            }
-        },
-        "restaurant-booking_internal_domain.Booking": {
+        "domain.Booking": {
             "type": "object",
             "properties": {
                 "booking_date": {
@@ -1684,7 +2177,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "restaurant": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                    "$ref": "#/definitions/domain.Restaurant"
                 },
                 "restaurant_id": {
                     "type": "string"
@@ -1696,10 +2189,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.BookingStatus"
+                    "$ref": "#/definitions/domain.BookingStatus"
                 },
                 "table": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.Table"
+                    "$ref": "#/definitions/domain.Table"
                 },
                 "table_id": {
                     "type": "string"
@@ -1708,14 +2201,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.User"
+                    "$ref": "#/definitions/domain.User"
                 },
                 "user_id": {
                     "type": "string"
                 }
             }
         },
-        "restaurant-booking_internal_domain.BookingStatus": {
+        "domain.BookingStatus": {
             "type": "string",
             "enum": [
                 "pending",
@@ -1732,7 +2225,7 @@ const docTemplate = `{
                 "BookingStatusNoShow"
             ]
         },
-        "restaurant-booking_internal_domain.CuisineType": {
+        "domain.CuisineType": {
             "type": "string",
             "enum": [
                 "Italian",
@@ -1771,7 +2264,7 @@ const docTemplate = `{
                 "CuisineTypeOther"
             ]
         },
-        "restaurant-booking_internal_domain.DaySchedule": {
+        "domain.DaySchedule": {
             "type": "object",
             "properties": {
                 "close_time": {
@@ -1785,7 +2278,7 @@ const docTemplate = `{
                 }
             }
         },
-        "restaurant-booking_internal_domain.LocationType": {
+        "domain.LocationType": {
             "type": "string",
             "enum": [
                 "window",
@@ -1800,7 +2293,79 @@ const docTemplate = `{
                 "LocationOutdoor"
             ]
         },
-        "restaurant-booking_internal_domain.Restaurant": {
+        "domain.Payment": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "booking": {
+                    "$ref": "#/definitions/domain.Booking"
+                },
+                "booking_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "external_payment_id": {
+                    "type": "string"
+                },
+                "external_payment_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "$ref": "#/definitions/domain.PaymentMethod"
+                },
+                "payment_status": {
+                    "$ref": "#/definitions/domain.PaymentStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.PaymentMethod": {
+            "type": "string",
+            "enum": [
+                "wallet",
+                "halyk",
+                "kaspi"
+            ],
+            "x-enum-varnames": [
+                "PaymentMethodWallet",
+                "PaymentMethodHalyk",
+                "PaymentMethodKaspi"
+            ]
+        },
+        "domain.PaymentStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "completed",
+                "failed",
+                "refunded"
+            ],
+            "x-enum-varnames": [
+                "PaymentStatusPending",
+                "PaymentStatusCompleted",
+                "PaymentStatusFailed",
+                "PaymentStatusRefunded"
+            ]
+        },
+        "domain.Restaurant": {
             "type": "object",
             "properties": {
                 "address": {
@@ -1812,14 +2377,14 @@ const docTemplate = `{
                 "bookings": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                        "$ref": "#/definitions/domain.Booking"
                     }
                 },
                 "created_at": {
                     "type": "string"
                 },
                 "cuisine_type": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.CuisineType"
+                    "$ref": "#/definitions/domain.CuisineType"
                 },
                 "description": {
                     "type": "string"
@@ -1830,7 +2395,7 @@ const docTemplate = `{
                 "images": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.RestaurantImage"
+                        "$ref": "#/definitions/domain.RestaurantImage"
                     }
                 },
                 "instagram": {
@@ -1848,7 +2413,7 @@ const docTemplate = `{
                 "managers": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.RestaurantManager"
+                        "$ref": "#/definitions/domain.RestaurantManager"
                     }
                 },
                 "max_combinable_tables": {
@@ -1858,7 +2423,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "owner": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.User"
+                    "$ref": "#/definitions/domain.User"
                 },
                 "owner_id": {
                     "type": "string"
@@ -1872,7 +2437,7 @@ const docTemplate = `{
                 "reviews": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.Review"
+                        "$ref": "#/definitions/domain.Review"
                     }
                 },
                 "reviews_count": {
@@ -1881,7 +2446,7 @@ const docTemplate = `{
                 "tables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.Table"
+                        "$ref": "#/definitions/domain.Table"
                     }
                 },
                 "updated_at": {
@@ -1891,11 +2456,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "working_hours": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.WorkingHours"
+                    "$ref": "#/definitions/domain.WorkingHours"
                 }
             }
         },
-        "restaurant-booking_internal_domain.RestaurantImage": {
+        "domain.RestaurantImage": {
             "type": "object",
             "properties": {
                 "cloudinary_public_id": {
@@ -1918,7 +2483,7 @@ const docTemplate = `{
                 }
             }
         },
-        "restaurant-booking_internal_domain.RestaurantManager": {
+        "domain.RestaurantManager": {
             "type": "object",
             "properties": {
                 "assigned_at": {
@@ -1928,24 +2493,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "restaurant": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                    "$ref": "#/definitions/domain.Restaurant"
                 },
                 "restaurant_id": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.User"
+                    "$ref": "#/definitions/domain.User"
                 },
                 "user_id": {
                     "type": "string"
                 }
             }
         },
-        "restaurant-booking_internal_domain.Review": {
+        "domain.Review": {
             "type": "object",
             "properties": {
                 "booking": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                    "$ref": "#/definitions/domain.Booking"
                 },
                 "booking_id": {
                     "type": "string"
@@ -1966,7 +2531,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "restaurant": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                    "$ref": "#/definitions/domain.Restaurant"
                 },
                 "restaurant_id": {
                     "type": "string"
@@ -1975,20 +2540,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.User"
+                    "$ref": "#/definitions/domain.User"
                 },
                 "user_id": {
                     "type": "string"
                 }
             }
         },
-        "restaurant-booking_internal_domain.Table": {
+        "domain.Table": {
             "type": "object",
             "properties": {
                 "bookings": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                        "$ref": "#/definitions/domain.Booking"
                     }
                 },
                 "created_at": {
@@ -2001,7 +2566,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "location_type": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.LocationType"
+                    "$ref": "#/definitions/domain.LocationType"
                 },
                 "max_capacity": {
                     "type": "integer"
@@ -2010,7 +2575,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "restaurant": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                    "$ref": "#/definitions/domain.Restaurant"
                 },
                 "restaurant_id": {
                     "type": "string"
@@ -2029,7 +2594,24 @@ const docTemplate = `{
                 }
             }
         },
-        "restaurant-booking_internal_domain.User": {
+        "domain.TransactionType": {
+            "type": "string",
+            "enum": [
+                "deposit",
+                "withdraw",
+                "booking_charge",
+                "refund",
+                "payment_to_restaurant"
+            ],
+            "x-enum-varnames": [
+                "TransactionDeposit",
+                "TransactionWithdraw",
+                "TransactionBookingCharge",
+                "TransactionRefund",
+                "TransactionPaymentToRestaurant"
+            ]
+        },
+        "domain.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -2038,7 +2620,7 @@ const docTemplate = `{
                 "bookings": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.Booking"
+                        "$ref": "#/definitions/domain.Booking"
                     }
                 },
                 "created_at": {
@@ -2065,13 +2647,13 @@ const docTemplate = `{
                 "managed_restaurants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.RestaurantManager"
+                        "$ref": "#/definitions/domain.RestaurantManager"
                     }
                 },
                 "owned_restaurants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.Restaurant"
+                        "$ref": "#/definitions/domain.Restaurant"
                     }
                 },
                 "phone": {
@@ -2080,18 +2662,18 @@ const docTemplate = `{
                 "reviews": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/restaurant-booking_internal_domain.Review"
+                        "$ref": "#/definitions/domain.Review"
                     }
                 },
                 "role": {
-                    "$ref": "#/definitions/restaurant-booking_internal_domain.UserRole"
+                    "$ref": "#/definitions/domain.UserRole"
                 },
                 "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "restaurant-booking_internal_domain.UserRole": {
+        "domain.UserRole": {
             "type": "string",
             "enum": [
                 "customer",
@@ -2106,10 +2688,449 @@ const docTemplate = `{
                 "UserRoleAdmin"
             ]
         },
-        "restaurant-booking_internal_domain.WorkingHours": {
+        "domain.Wallet": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.WalletTransaction"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.WalletTransaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "booking": {
+                    "$ref": "#/definitions/domain.Booking"
+                },
+                "booking_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/domain.TransactionType"
+                },
+                "wallet": {
+                    "$ref": "#/definitions/domain.Wallet"
+                },
+                "wallet_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.WorkingHours": {
             "type": "object",
             "additionalProperties": {
-                "$ref": "#/definitions/restaurant-booking_internal_domain.DaySchedule"
+                "$ref": "#/definitions/domain.DaySchedule"
+            }
+        },
+        "handler.AddManagerRequest": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "handler.AvailabilityResponse": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "boolean"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CreateBookingRequest": {
+            "type": "object",
+            "required": [
+                "booking_date",
+                "end_time",
+                "guests_count",
+                "restaurant_id",
+                "start_time",
+                "table_id",
+                "user_id"
+            ],
+            "properties": {
+                "booking_date": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "guests_count": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "restaurant_id": {
+                    "type": "string"
+                },
+                "special_note": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "table_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CreatePaymentRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "user_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "booking_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CreateRestaurantRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "average_price",
+                "cuisine_type",
+                "max_combinable_tables",
+                "name",
+                "owner_id",
+                "phone",
+                "working_hours"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "average_price": {
+                    "type": "integer"
+                },
+                "cuisine_type": {
+                    "$ref": "#/definitions/domain.CuisineType"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "instagram": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "max_combinable_tables": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "website": {
+                    "type": "string"
+                },
+                "working_hours": {
+                    "$ref": "#/definitions/domain.WorkingHours"
+                }
+            }
+        },
+        "handler.CreateReviewRequest": {
+            "type": "object",
+            "required": [
+                "rating",
+                "restaurant_id",
+                "user_id"
+            ],
+            "properties": {
+                "booking_id": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                },
+                "restaurant_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CreateTableRequest": {
+            "type": "object",
+            "required": [
+                "location_type",
+                "max_capacity",
+                "min_capacity",
+                "restaurant_id",
+                "table_number"
+            ],
+            "properties": {
+                "location_type": {
+                    "$ref": "#/definitions/domain.LocationType"
+                },
+                "max_capacity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "min_capacity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "restaurant_id": {
+                    "type": "string"
+                },
+                "table_number": {
+                    "type": "string"
+                },
+                "x_position": {
+                    "type": "integer"
+                },
+                "y_position": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "password",
+                "phone",
+                "role"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/domain.UserRole"
+                }
+            }
+        },
+        "handler.DepositRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "user_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "description": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "invalid request"
+                }
+            }
+        },
+        "handler.PaymentWithURLResponse": {
+            "type": "object",
+            "properties": {
+                "external_payment_url": {
+                    "type": "string"
+                },
+                "payment": {
+                    "$ref": "#/definitions/domain.Payment"
+                }
+            }
+        },
+        "handler.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "operation successful"
+                }
+            }
+        },
+        "handler.UpdateBookingStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/domain.BookingStatus"
+                }
+            }
+        },
+        "handler.UpdateRestaurantRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.UpdateReviewRequest": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                }
+            }
+        },
+        "handler.UpdateTableRequest": {
+            "type": "object",
+            "properties": {
+                "is_active": {
+                    "type": "boolean"
+                },
+                "location_type": {
+                    "$ref": "#/definitions/domain.LocationType"
+                },
+                "x_position": {
+                    "type": "integer"
+                },
+                "y_position": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.WebhookRequest": {
+            "type": "object",
+            "required": [
+                "external_payment_id",
+                "status"
+            ],
+            "properties": {
+                "external_payment_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.WithdrawRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "user_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "description": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
             }
         }
     }
@@ -2118,7 +3139,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8088",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
 	Title:            "Restaurant Booking API",
