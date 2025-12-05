@@ -51,11 +51,15 @@ func main() {
 	bookingRepo := repository.NewBookingRepository(db)
 	reviewRepo := repository.NewReviewRepository(db)
 	restaurantManagerRepo := repository.NewRestaurantManagerRepository(db)
+	walletRepo := repository.NewWalletRepository(db)
+	paymentRepo := repository.NewPaymentRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtManager)
 	userService := service.NewUserService(userRepo)
 	restaurantService := service.NewRestaurantService(restaurantRepo, db)
+	walletService := service.NewWalletService(walletRepo, db)
+	paymentService := service.NewPaymentService(paymentRepo, walletService, db)
 	// tableService := service.NewTableService(tableRepo, restaurantRepo, db) // Not used yet
 	managerService := service.NewManagerService(restaurantManagerRepo, restaurantRepo, userRepo)
 
@@ -67,6 +71,8 @@ func main() {
 	bookingHandler := handler.NewBookingHandler(bookingRepo, tableRepo)
 	reviewHandler := handler.NewReviewHandler(reviewRepo, restaurantRepo)
 	managerHandler := handler.NewManagerHandler(managerService)
+	walletHandler := handler.NewWalletHandler(walletService)
+	paymentHandler := handler.NewPaymentHandler(paymentService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
@@ -168,6 +174,27 @@ func main() {
 			reviews.GET("/:id", reviewHandler.GetReview)
 			reviews.PUT("/:id", reviewHandler.UpdateReview)
 			reviews.DELETE("/:id", reviewHandler.DeleteReview)
+		}
+
+		// Wallet routes
+		wallet := api.Group("/wallet")
+		{
+			wallet.GET("", walletHandler.GetWallet)
+			wallet.GET("/transactions", walletHandler.GetTransactions)
+			wallet.POST("/deposit", walletHandler.Deposit)
+			wallet.POST("/withdraw", walletHandler.Withdraw)
+		}
+
+		// Payment routes
+		payments := api.Group("/payments")
+		{
+			payments.GET("", paymentHandler.GetUserPayments)
+			payments.POST("/wallet", paymentHandler.CreateWalletPayment)
+			payments.POST("/halyk", paymentHandler.CreateHalykPayment)
+			payments.POST("/kaspi", paymentHandler.CreateKaspiPayment)
+			payments.POST("/webhook/halyk", paymentHandler.HalykWebhook)
+			payments.POST("/webhook/kaspi", paymentHandler.KaspiWebhook)
+			payments.POST("/:id/refund", paymentHandler.RefundPayment)
 		}
 	}
 
