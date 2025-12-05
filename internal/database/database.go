@@ -93,9 +93,6 @@ END$$;`).Error; err != nil {
 		&domain.Table{},
 		&domain.Booking{},
 		&domain.Review{},
-		&domain.Wallet{},
-		&domain.WalletTransaction{},
-		&domain.Payment{},
 	); err != nil {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
 	}
@@ -123,21 +120,6 @@ func createEnumTypes(db *gorm.DB) error {
 		END $$;`,
 		`DO $$ BEGIN
 			CREATE TYPE location_type AS ENUM ('window', 'vip', 'regular', 'outdoor');
-		EXCEPTION
-			WHEN duplicate_object THEN null;
-		END $$;`,
-		`DO $$ BEGIN
-			CREATE TYPE transaction_type AS ENUM ('deposit', 'withdraw', 'booking_charge', 'refund', 'payment_to_restaurant');
-		EXCEPTION
-			WHEN duplicate_object THEN null;
-		END $$;`,
-		`DO $$ BEGIN
-			CREATE TYPE payment_method AS ENUM ('wallet', 'halyk', 'kaspi');
-		EXCEPTION
-			WHEN duplicate_object THEN null;
-		END $$;`,
-		`DO $$ BEGIN
-			CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed', 'refunded');
 		EXCEPTION
 			WHEN duplicate_object THEN null;
 		END $$;`,
