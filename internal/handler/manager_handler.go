@@ -3,7 +3,7 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"restaurant-booking/internal/domain"
+	_ "restaurant-booking/internal/domain"
 	"restaurant-booking/internal/service"
 
 	"github.com/gin-gonic/gin"
