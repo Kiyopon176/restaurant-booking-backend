@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
@@ -31,7 +32,8 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 }
 
 func (s *userService) GetUserByID(id uuid.UUID) (*domain.User, error) {
-	user, err := s.userRepo.GetByID(id)
+	ctx := context.Background()
+	user, err := s.userRepo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
@@ -42,7 +44,8 @@ func (s *userService) GetUserByID(id uuid.UUID) (*domain.User, error) {
 }
 
 func (s *userService) UpdateUser(id uuid.UUID, name string, phone *string) (*domain.User, error) {
-	user, err := s.userRepo.GetByID(id)
+	ctx := context.Background()
+	user, err := s.userRepo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
@@ -50,10 +53,13 @@ func (s *userService) UpdateUser(id uuid.UUID, name string, phone *string) (*dom
 		return nil, err
 	}
 
-	user.Name = name
-	user.Phone = phone
+	// Update FirstName (use name as FirstName for simplicity)
+	user.FirstName = name
+	if phone != nil {
+		user.Phone = *phone
+	}
 
-	if err := s.userRepo.Update(user); err != nil {
+	if err := s.userRepo.Update(ctx, user); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +67,8 @@ func (s *userService) UpdateUser(id uuid.UUID, name string, phone *string) (*dom
 }
 
 func (s *userService) ChangePassword(id uuid.UUID, oldPassword, newPassword string) error {
-	user, err := s.userRepo.GetByID(id)
+	ctx := context.Background()
+	user, err := s.userRepo.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrUserNotFound
@@ -70,7 +77,7 @@ func (s *userService) ChangePassword(id uuid.UUID, oldPassword, newPassword stri
 	}
 
 	// Verify old password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(oldPassword)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
 		return ErrOldPasswordIncorrect
 	}
 
@@ -85,7 +92,7 @@ func (s *userService) ChangePassword(id uuid.UUID, oldPassword, newPassword stri
 		return err
 	}
 
-	user.PasswordHash = string(hashedPassword)
+	user.Password = string(hashedPassword)
 
-	return s.userRepo.Update(user)
+	return s.userRepo.Update(ctx, user)
 }

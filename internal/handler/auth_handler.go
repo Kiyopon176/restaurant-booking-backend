@@ -70,10 +70,6 @@ type MessageResponse struct {
 	Message string `json:"message"`
 }
 
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -206,11 +202,19 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 }
 
 func toUserResponse(user *domain.User) *UserResponse {
+	name := user.FirstName
+	if user.LastName != "" {
+		name += " " + user.LastName
+	}
+	phonePtr := &user.Phone
+	if user.Phone == "" {
+		phonePtr = nil
+	}
 	return &UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
-		Name:      user.Name,
-		Phone:     user.Phone,
+		Name:      name,
+		Phone:     phonePtr,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"regexp"
 	"restaurant-booking/internal/domain"
@@ -60,7 +61,8 @@ func (s *authService) Register(email, password, name string, phone *string, role
 	}
 
 	// Check if email already exists
-	_, err := s.userRepo.GetByEmail(email)
+	ctx := context.Background()
+	_, err := s.userRepo.GetByEmail(ctx, email)
 	if err == nil {
 		return nil, "", "", ErrEmailExists
 	}
@@ -74,19 +76,31 @@ func (s *authService) Register(email, password, name string, phone *string, role
 		return nil, "", "", err
 	}
 
-	// Create user
-	user := &domain.User{
-		ID:           uuid.New(),
-		Email:        email,
-		PasswordHash: string(hashedPassword),
-		Name:         name,
-		Phone:        phone,
-		Role:         role,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+	// Parse name into FirstName and LastName
+	firstName := name
+	lastName := ""
+
+	// Convert phone pointer to string
+	phoneStr := ""
+	if phone != nil {
+		phoneStr = *phone
 	}
 
-	if err := s.userRepo.Create(user); err != nil {
+	// Create user
+	user := &domain.User{
+		ID:        uuid.New(),
+		Email:     email,
+		Password:  string(hashedPassword),
+		FirstName: firstName,
+		LastName:  lastName,
+		Phone:     phoneStr,
+		Role:      role,
+		IsActive:  true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	if err := s.userRepo.Create(ctx, user); err != nil {
 		return nil, "", "", err
 	}
 
@@ -118,8 +132,10 @@ func (s *authService) Register(email, password, name string, phone *string, role
 }
 
 func (s *authService) Login(email, password string) (string, string, *domain.User, error) {
+	ctx := context.Background()
+
 	// Get user by email
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", "", nil, ErrInvalidCredentials
@@ -128,7 +144,7 @@ func (s *authService) Login(email, password string) (string, string, *domain.Use
 	}
 
 	// Check password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return "", "", nil, ErrInvalidCredentials
 	}
 
@@ -177,7 +193,8 @@ func (s *authService) RefreshToken(refreshToken string) (string, string, error) 
 	}
 
 	// Get user
-	user, err := s.userRepo.GetByID(tokenEntity.UserID)
+	ctx := context.Background()
+	user, err := s.userRepo.GetByID(ctx, tokenEntity.UserID)
 	if err != nil {
 		return "", "", err
 	}

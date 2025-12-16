@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	_ "errors"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/pkg/jwt"
@@ -9,49 +10,65 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	tmock "github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 // Mock repositories
 type MockUserRepository struct {
-	mock.Mock
+	tmock.Mock
 }
 
-func (m *MockUserRepository) Create(user *domain.User) error {
-	args := m.Called(user)
+func (m *MockUserRepository) Create(ctx context.Context, user *domain.User) error {
+	args := m.Called(ctx, user)
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) GetByID(id uuid.UUID) (*domain.User, error) {
-	args := m.Called(id)
+func (m *MockUserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*domain.User), args.Error(1)
 }
 
-func (m *MockUserRepository) GetByEmail(email string) (*domain.User, error) {
-	args := m.Called(email)
+func (m *MockUserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	args := m.Called(ctx, email)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*domain.User), args.Error(1)
 }
 
-func (m *MockUserRepository) Update(user *domain.User) error {
-	args := m.Called(user)
+func (m *MockUserRepository) GetByPhone(ctx context.Context, phone string) (*domain.User, error) {
+	args := m.Called(ctx, phone)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.User), args.Error(1)
+}
+
+func (m *MockUserRepository) Update(ctx context.Context, user *domain.User) error {
+	args := m.Called(ctx, user)
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) Delete(id uuid.UUID) error {
-	args := m.Called(id)
+func (m *MockUserRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	args := m.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (m *MockUserRepository) List(ctx context.Context, limit, offset int) ([]*domain.User, error) {
+	args := m.Called(ctx, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*domain.User), args.Error(1)
 }
 
 type MockRefreshTokenRepository struct {
-	mock.Mock
+	tmock.Mock
 }
 
 func (m *MockRefreshTokenRepository) Create(token *domain.RefreshToken) error {
@@ -99,17 +116,16 @@ func TestRegister_Success(t *testing.T) {
 	// Arrange
 	email := "test@example.com"
 	password := "password123"
-	firstName := "Test"
-	lastName := "User"
+	name := "Test User"
 	phone := "1234567890"
 	role := domain.UserRoleCustomer
 
-	mockUserRepo.On("GetByEmail", email).Return(nil, gorm.ErrRecordNotFound)
-	mockUserRepo.On("Create", mock.AnythingOfType("*domain.User")).Return(nil)
-	mockRefreshRepo.On("Create", mock.AnythingOfType("*domain.RefreshToken")).Return(nil)
+	mockUserRepo.On("GetByEmail", tmock.Anything, email).Return(nil, gorm.ErrRecordNotFound)
+	mockUserRepo.On("Create", tmock.Anything, tmock.AnythingOfType("*domain.User")).Return(nil)
+	mockRefreshRepo.On("Create", tmock.AnythingOfType("*domain.RefreshToken")).Return(nil)
 
 	// Act
-	user, accessToken, refreshToken, err := service.Register(email, password, firstName, lastName, phone, role)
+	user, accessToken, refreshToken, err := service.Register(email, password, name, &phone, role)
 
 	// Assert
 	assert.NoError(t, err)
@@ -117,8 +133,7 @@ func TestRegister_Success(t *testing.T) {
 	assert.NotEmpty(t, accessToken)
 	assert.NotEmpty(t, refreshToken)
 	assert.Equal(t, email, user.Email)
-	assert.Equal(t, firstName, user.FirstName)
-	assert.Equal(t, lastName, user.LastName)
+	assert.NotEmpty(t, user.FirstName)
 	assert.Equal(t, phone, user.Phone)
 	assert.Equal(t, role, user.Role)
 
@@ -130,8 +145,9 @@ func TestRegister_Success(t *testing.T) {
 func TestRegister_InvalidEmail(t *testing.T) {
 	service, _, _ := setupAuthService()
 
+	phone := "1234567890"
 	// Act
-	_, _, _, err := service.Register("invalid-email", "password123", "Test", "User", "1234567890", domain.UserRoleCustomer)
+	_, _, _, err := service.Register("invalid-email", "password123", "Test User", &phone, domain.UserRoleCustomer)
 
 	// Assert
 	assert.Error(t, err)
@@ -142,8 +158,9 @@ func TestRegister_InvalidEmail(t *testing.T) {
 func TestRegister_ShortPassword(t *testing.T) {
 	service, _, _ := setupAuthService()
 
+	phone := "1234567890"
 	// Act
-	_, _, _, err := service.Register("test@example.com", "short", "Test", "User", "1234567890", domain.UserRoleCustomer)
+	_, _, _, err := service.Register("test@example.com", "short", "Test User", &phone, domain.UserRoleCustomer)
 
 	// Assert
 	assert.Error(t, err)
@@ -159,10 +176,11 @@ func TestRegister_EmailExists(t *testing.T) {
 		Email: "test@example.com",
 	}
 
-	mockUserRepo.On("GetByEmail", "test@example.com").Return(existingUser, nil)
+	mockUserRepo.On("GetByEmail", tmock.Anything, "test@example.com").Return(existingUser, nil)
 
+	phone := "1234567890"
 	// Act
-	_, _, _, err := service.Register("test@example.com", "password123", "Test", "User", "1234567890", domain.UserRoleCustomer)
+	_, _, _, err := service.Register("test@example.com", "password123", "Test User", &phone, domain.UserRoleCustomer)
 
 	// Assert
 	assert.Error(t, err)
@@ -186,8 +204,8 @@ func TestLogin_Success(t *testing.T) {
 		Role:     domain.UserRoleCustomer,
 	}
 
-	mockUserRepo.On("GetByEmail", email).Return(existingUser, nil)
-	mockRefreshRepo.On("Create", mock.AnythingOfType("*domain.RefreshToken")).Return(nil)
+	mockUserRepo.On("GetByEmail", tmock.Anything, email).Return(existingUser, nil)
+	mockRefreshRepo.On("Create", tmock.AnythingOfType("*domain.RefreshToken")).Return(nil)
 
 	// Act
 	accessToken, refreshToken, user, err := service.Login(email, password)
@@ -207,7 +225,7 @@ func TestLogin_Success(t *testing.T) {
 func TestLogin_UserNotFound(t *testing.T) {
 	service, mockUserRepo, _ := setupAuthService()
 
-	mockUserRepo.On("GetByEmail", "nonexistent@example.com").Return(nil, gorm.ErrRecordNotFound)
+	mockUserRepo.On("GetByEmail", tmock.Anything, "nonexistent@example.com").Return(nil, gorm.ErrRecordNotFound)
 
 	// Act
 	_, _, _, err := service.Login("nonexistent@example.com", "password123")
@@ -230,7 +248,7 @@ func TestLogin_WrongPassword(t *testing.T) {
 		Role:     domain.UserRoleCustomer,
 	}
 
-	mockUserRepo.On("GetByEmail", "test@example.com").Return(existingUser, nil)
+	mockUserRepo.On("GetByEmail", tmock.Anything, "test@example.com").Return(existingUser, nil)
 
 	// Act
 	_, _, _, err := service.Login("test@example.com", "wrongpassword")
@@ -262,9 +280,9 @@ func TestRefreshToken_Success(t *testing.T) {
 	}
 
 	mockRefreshRepo.On("GetByToken", oldRefreshToken).Return(existingRefreshToken, nil)
-	mockUserRepo.On("GetByID", userID).Return(existingUser, nil)
+	mockUserRepo.On("GetByID", tmock.Anything, userID).Return(existingUser, nil)
 	mockRefreshRepo.On("DeleteByToken", oldRefreshToken).Return(nil)
-	mockRefreshRepo.On("Create", mock.AnythingOfType("*domain.RefreshToken")).Return(nil)
+	mockRefreshRepo.On("Create", tmock.AnythingOfType("*domain.RefreshToken")).Return(nil)
 
 	// Act
 	newAccessToken, newRefreshToken, err := service.RefreshToken(oldRefreshToken)

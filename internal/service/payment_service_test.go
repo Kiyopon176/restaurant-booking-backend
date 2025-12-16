@@ -9,14 +9,14 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	tmock "github.com/stretchr/testify/mock"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 // Mock PaymentRepository
 type MockPaymentRepository struct {
-	mock.Mock
+	tmock.Mock
 }
 
 func (m *MockPaymentRepository) Create(ctx context.Context, payment *domain.Payment) error {
@@ -55,7 +55,7 @@ func (m *MockPaymentRepository) Update(ctx context.Context, payment *domain.Paym
 
 // Mock WalletService
 type MockWalletService struct {
-	mock.Mock
+	tmock.Mock
 }
 
 func (m *MockWalletService) GetOrCreateWallet(ctx context.Context, userID uuid.UUID) (*domain.Wallet, error) {
@@ -132,8 +132,8 @@ func TestCreatePayment_WalletPayment_Success(t *testing.T) {
 	amount := 10000
 
 	mock.ExpectBegin()
-	mockPaymentRepo.On("Create", ctx, mock.AnythingOfType("*domain.Payment")).Return(nil)
-	mockPaymentRepo.On("GetByID", ctx, mock.AnythingOfType("uuid.UUID")).Return(&domain.Payment{
+	mockPaymentRepo.On("Create", ctx, tmock.AnythingOfType("*domain.Payment")).Return(nil)
+	mockPaymentRepo.On("GetByID", ctx, tmock.AnythingOfType("uuid.UUID")).Return(&domain.Payment{
 		ID:            uuid.New(),
 		UserID:        userID,
 		Amount:        amount,
@@ -141,7 +141,7 @@ func TestCreatePayment_WalletPayment_Success(t *testing.T) {
 		PaymentStatus: domain.PaymentStatusCompleted,
 	}, nil)
 	mockWalletService.On("ChargeForBooking", ctx, userID, amount, bookingID).Return(nil)
-	mockPaymentRepo.On("Update", ctx, mock.AnythingOfType("*domain.Payment")).Return(nil)
+	mockPaymentRepo.On("Update", ctx, tmock.AnythingOfType("*domain.Payment")).Return(nil)
 	mock.ExpectCommit()
 
 	// Act
@@ -318,7 +318,7 @@ func TestProcessExternalPaymentCallback_Success(t *testing.T) {
 	mock.ExpectBegin()
 	mockPaymentRepo.On("GetByExternalID", ctx, externalID).Return(payment, nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
-	mockWalletService.On("Deposit", ctx, userID, amount, mock.AnythingOfType("string")).Return(nil)
+	mockWalletService.On("Deposit", ctx, userID, amount, tmock.AnythingOfType("string")).Return(nil)
 	mock.ExpectCommit()
 
 	// Act
@@ -381,7 +381,7 @@ func TestRefundPayment_Success(t *testing.T) {
 
 	mock.ExpectBegin()
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
-	mockWalletService.On("RefundBooking", ctx, userID, amount, bookingID, mock.AnythingOfType("string")).Return(nil)
+	mockWalletService.On("RefundBooking", ctx, userID, amount, bookingID, tmock.AnythingOfType("string")).Return(nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 	mock.ExpectCommit()
 

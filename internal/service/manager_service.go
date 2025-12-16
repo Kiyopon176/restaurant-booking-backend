@@ -14,7 +14,6 @@ import (
 var (
 	ErrManagerAlreadyExists = errors.New("user is already a manager for this restaurant")
 	ErrManagerNotFound      = errors.New("manager not found")
-	ErrUserNotFound         = errors.New("user not found")
 )
 
 type AddManagerRequest struct {

@@ -50,7 +50,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 		}
 
 		// Check if user exists
-		user, err := m.userRepo.GetByID(claims.UserID)
+		user, err := m.userRepo.GetByID(c.Request.Context(), claims.UserID)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 			c.Abort()
