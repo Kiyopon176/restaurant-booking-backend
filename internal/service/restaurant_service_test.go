@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"restaurant-booking/internal/domain"
-	"restaurant-booking/internal/repository" // Важно для проверки интерфейса
+	"restaurant-booking/internal/repository"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
