@@ -49,17 +49,15 @@ func NewAuthService(
 }
 
 func (s *authService) Register(email, password, firstName, lastName string, phone string, role domain.UserRole) (*domain.User, string, string, error) {
-	// Validate email format
+
 	if !isValidEmail(email) {
 		return nil, "", "", ErrInvalidEmail
 	}
 
-	// Validate password length
 	if len(password) < 8 {
 		return nil, "", "", ErrInvalidPassword
 	}
 
-	// Check if email already exists
 	_, err := s.userRepo.GetByEmail(email)
 	if err == nil {
 		return nil, "", "", ErrEmailExists
@@ -68,13 +66,11 @@ func (s *authService) Register(email, password, firstName, lastName string, phon
 		return nil, "", "", err
 	}
 
-	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, "", "", err
 	}
 
-	// Create user
 	user := &domain.User{
 		ID:        uuid.New(),
 		Email:     email,
@@ -92,7 +88,6 @@ func (s *authService) Register(email, password, firstName, lastName string, phon
 		return nil, "", "", err
 	}
 
-	// Generate tokens
 	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Role)
 	if err != nil {
 		return nil, "", "", err
@@ -103,7 +98,6 @@ func (s *authService) Register(email, password, firstName, lastName string, phon
 		return nil, "", "", err
 	}
 
-	// Save refresh token
 	refreshTokenEntity := &domain.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    user.ID,
@@ -120,7 +114,7 @@ func (s *authService) Register(email, password, firstName, lastName string, phon
 }
 
 func (s *authService) Login(email, password string) (string, string, *domain.User, error) {
-	// Get user by email
+
 	user, err := s.userRepo.GetByEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -129,12 +123,10 @@ func (s *authService) Login(email, password string) (string, string, *domain.Use
 		return "", "", nil, err
 	}
 
-	// Check password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return "", "", nil, ErrInvalidCredentials
 	}
 
-	// Generate tokens
 	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Role)
 	if err != nil {
 		return "", "", nil, err
@@ -145,7 +137,6 @@ func (s *authService) Login(email, password string) (string, string, *domain.Use
 		return "", "", nil, err
 	}
 
-	// Save refresh token
 	refreshTokenEntity := &domain.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    user.ID,
@@ -162,7 +153,7 @@ func (s *authService) Login(email, password string) (string, string, *domain.Use
 }
 
 func (s *authService) RefreshToken(refreshToken string) (string, string, error) {
-	// Get refresh token from database
+
 	tokenEntity, err := s.refreshTokenRepo.GetByToken(refreshToken)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -171,20 +162,17 @@ func (s *authService) RefreshToken(refreshToken string) (string, string, error) 
 		return "", "", err
 	}
 
-	// Check if token is expired
 	if time.Now().After(tokenEntity.ExpiresAt) {
-		// Delete expired token
+
 		_ = s.refreshTokenRepo.DeleteByToken(refreshToken)
 		return "", "", ErrExpiredRefreshToken
 	}
 
-	// Get user
 	user, err := s.userRepo.GetByID(tokenEntity.UserID)
 	if err != nil {
 		return "", "", err
 	}
 
-	// Generate new tokens
 	newAccessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Role)
 	if err != nil {
 		return "", "", err
@@ -195,12 +183,10 @@ func (s *authService) RefreshToken(refreshToken string) (string, string, error) 
 		return "", "", err
 	}
 
-	// Delete old refresh token
 	if err := s.refreshTokenRepo.DeleteByToken(refreshToken); err != nil {
 		return "", "", err
 	}
 
-	// Save new refresh token
 	newTokenEntity := &domain.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    user.ID,

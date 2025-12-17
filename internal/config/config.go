@@ -21,7 +21,7 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	// Load .env file (ignore error if not exists)
+
 	_ = godotenv.Load()
 
 	cfg := &Config{
@@ -34,12 +34,10 @@ func Load() (*Config, error) {
 		Port:       getEnv("PORT", "8080"),
 	}
 
-	// Validate required fields
 	if cfg.JWTSecret == "" {
 		return nil, errors.New("JWT_SECRET is required")
 	}
 
-	// Parse JWT expiration times
 	accessExpire := getEnv("JWT_ACCESS_EXPIRE", "15m")
 	refreshExpire := getEnv("JWT_REFRESH_EXPIRE", "7d")
 

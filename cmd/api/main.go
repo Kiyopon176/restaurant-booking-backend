@@ -19,20 +19,13 @@ import (
 	_ "restaurant-booking/docs"
 )
 
-// @title Restaurant Booking API
-// @version 1.0
-// @description API для системы бронирования столиков в ресторанах
-// @host localhost:8080
-// @BasePath /
-// @schemes http
 func main() {
-	// Load configuration
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
 	}
 
-	// Initialize database
 	db, err := database.InitDB(cfg)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
@@ -40,10 +33,8 @@ func main() {
 
 	fmt.Println("Successfully connected to database!")
 
-	// Initialize JWT manager
 	jwtManager := jwt.NewManager(cfg.JWTSecret, cfg.JWTAccessExpire, cfg.JWTRefreshExpire)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	restaurantRepo := repository.NewRestaurantRepository(db)
@@ -54,16 +45,14 @@ func main() {
 	walletRepo := repository.NewWalletRepository(db)
 	paymentRepo := repository.NewPaymentRepository(db)
 
-	// Initialize services
 	authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtManager)
 	userService := service.NewUserService(userRepo)
 	restaurantService := service.NewRestaurantService(restaurantRepo, db)
 	walletService := service.NewWalletService(walletRepo, db)
 	paymentService := service.NewPaymentService(paymentRepo, walletService, db)
-	// tableService := service.NewTableService(tableRepo, restaurantRepo, db) // Not used yet
+
 	managerService := service.NewManagerService(restaurantManagerRepo, restaurantRepo, userRepo)
 
-	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService, userService)
 	userHandler := handler.NewUserHandler(userRepo)
 	restaurantHandler := handler.NewRestaurantHandler(restaurantService)
@@ -74,13 +63,10 @@ func main() {
 	walletHandler := handler.NewWalletHandler(walletService)
 	paymentHandler := handler.NewPaymentHandler(paymentService)
 
-	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
 
-	// Setup Gin router
 	r := gin.Default()
 
-	// CORS middleware
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
@@ -89,10 +75,8 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Health check
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ok",
@@ -102,7 +86,7 @@ func main() {
 
 	api := r.Group("/api")
 	{
-		// Auth routes
+
 		auth := api.Group("/auth")
 		{
 			auth.POST("/register", authHandler.Register)
@@ -112,33 +96,28 @@ func main() {
 			auth.GET("/me", authMiddleware.Authenticate(), authHandler.GetMe)
 		}
 
-		// User routes
 		users := api.Group("/users")
 		{
 			users.POST("", userHandler.CreateUser)
-			// users.GET("", userHandler.ListUsers) // Commented out - not implemented
+
 			users.GET("/:id", userHandler.GetUser)
 			users.GET("/:id/bookings", bookingHandler.GetUserBookings)
 			users.GET("/:id/reviews", reviewHandler.GetUserReviews)
 		}
 
-		// Restaurant routes
 		restaurants := api.Group("/restaurants")
 		{
 			restaurants.POST("", restaurantHandler.CreateRestaurant)
 			restaurants.GET("", restaurantHandler.ListRestaurants)
-			// restaurants.GET("/search", restaurantHandler.SearchRestaurants) // Not implemented yet
 
 			restaurants.GET("/:id/tables", tableHandler.GetRestaurantTables)
 			restaurants.GET("/:id/bookings", bookingHandler.GetRestaurantBookings)
 			restaurants.GET("/:id/reviews", reviewHandler.GetRestaurantReviews)
 
-			// Manager routes
 			restaurants.POST("/:id/managers", managerHandler.AddManager)
 			restaurants.GET("/:id/managers", managerHandler.GetManagers)
 			restaurants.DELETE("/:id/managers/:user_id", managerHandler.RemoveManager)
 
-			// Image routes
 			restaurants.POST("/:id/images", restaurantHandler.AddImage)
 			restaurants.DELETE("/:id/images/:image_id", restaurantHandler.DeleteImage)
 
@@ -147,7 +126,6 @@ func main() {
 			restaurants.DELETE("/:id", restaurantHandler.DeleteRestaurant)
 		}
 
-		// Table routes
 		tables := api.Group("/tables")
 		{
 			tables.POST("", tableHandler.CreateTable)
@@ -157,7 +135,6 @@ func main() {
 			tables.DELETE("/:id", tableHandler.DeleteTable)
 		}
 
-		// Booking routes
 		bookings := api.Group("/bookings")
 		{
 			bookings.POST("", bookingHandler.CreateBooking)
@@ -167,7 +144,6 @@ func main() {
 			bookings.POST("/:id/cancel", bookingHandler.CancelBooking)
 		}
 
-		// Review routes
 		reviews := api.Group("/reviews")
 		{
 			reviews.POST("", reviewHandler.CreateReview)
@@ -176,7 +152,6 @@ func main() {
 			reviews.DELETE("/:id", reviewHandler.DeleteReview)
 		}
 
-		// Wallet routes
 		wallet := api.Group("/wallet")
 		{
 			wallet.GET("", walletHandler.GetWallet)
@@ -185,7 +160,6 @@ func main() {
 			wallet.POST("/withdraw", walletHandler.Withdraw)
 		}
 
-		// Payment routes
 		payments := api.Group("/payments")
 		{
 			payments.GET("", paymentHandler.GetUserPayments)

@@ -22,17 +22,6 @@ func NewReviewHandler(reviewRepo repository.ReviewRepository, restaurantRepo rep
 	}
 }
 
-// CreateReview godoc
-// @Summary Создать отзыв
-// @Description Создать новый отзыв о ресторане
-// @Tags reviews
-// @Accept json
-// @Produce json
-// @Param review body CreateReviewRequest true "Данные отзыва"
-// @Success 201 {object} domain.Review
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/reviews [post]
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	var req CreateReviewRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -57,17 +46,6 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	c.JSON(http.StatusCreated, review)
 }
 
-// GetReview godoc
-// @Summary Получить отзыв
-// @Description Получить информацию об отзыве по ID
-// @Tags reviews
-// @Accept json
-// @Produce json
-// @Param id path string true "Review ID"
-// @Success 200 {object} domain.Review
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Router /api/reviews/{id} [get]
 func (h *ReviewHandler) GetReview(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -85,19 +63,6 @@ func (h *ReviewHandler) GetReview(c *gin.Context) {
 	c.JSON(http.StatusOK, review)
 }
 
-// GetRestaurantReviews godoc
-// @Summary Получить отзывы ресторана
-// @Description Получить все отзывы определенного ресторана с пагинацией
-// @Tags reviews
-// @Accept json
-// @Produce json
-// @Param id path string true "Restaurant ID"
-// @Param limit query int false "Количество записей" default(10)
-// @Param offset query int false "Смещение" default(0)
-// @Success 200 {array} domain.Review
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/restaurants/{id}/reviews [get]
 func (h *ReviewHandler) GetRestaurantReviews(c *gin.Context) {
 	idStr := c.Param("id")
 	restaurantID, err := uuid.Parse(idStr)
@@ -125,17 +90,6 @@ func (h *ReviewHandler) GetRestaurantReviews(c *gin.Context) {
 	c.JSON(http.StatusOK, reviews)
 }
 
-// GetUserReviews godoc
-// @Summary Получить отзывы пользователя
-// @Description Получить все отзывы определенного пользователя
-// @Tags reviews
-// @Accept json
-// @Produce json
-// @Param user_id path string true "User ID"
-// @Success 200 {array} domain.Review
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/users/{user_id}/reviews [get]
 func (h *ReviewHandler) GetUserReviews(c *gin.Context) {
 	idStr := c.Param("user_id")
 	userID, err := uuid.Parse(idStr)
@@ -153,19 +107,6 @@ func (h *ReviewHandler) GetUserReviews(c *gin.Context) {
 	c.JSON(http.StatusOK, reviews)
 }
 
-// UpdateReview godoc
-// @Summary Обновить отзыв
-// @Description Обновить информацию об отзыве
-// @Tags reviews
-// @Accept json
-// @Produce json
-// @Param id path string true "Review ID"
-// @Param review body UpdateReviewRequest true "Данные для обновления"
-// @Success 200 {object} domain.Review
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/reviews/{id} [put]
 func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -201,17 +142,6 @@ func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 	c.JSON(http.StatusOK, review)
 }
 
-// DeleteReview godoc
-// @Summary Удалить отзыв
-// @Description Удалить отзыв по ID
-// @Tags reviews
-// @Accept json
-// @Produce json
-// @Param id path string true "Review ID"
-// @Success 204
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Router /api/reviews/{id} [delete]
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)

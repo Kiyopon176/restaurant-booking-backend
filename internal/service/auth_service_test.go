@@ -14,7 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Mock repositories
 type MockUserRepository struct {
 	mock.Mock
 }
@@ -77,7 +76,6 @@ func (m *MockRefreshTokenRepository) DeleteAllByUserID(userID uuid.UUID) error {
 	return args.Error(0)
 }
 
-// Helper function
 func setupAuthService() (*authService, *MockUserRepository, *MockRefreshTokenRepository) {
 	mockUserRepo := new(MockUserRepository)
 	mockRefreshRepo := new(MockRefreshTokenRepository)
@@ -92,11 +90,9 @@ func setupAuthService() (*authService, *MockUserRepository, *MockRefreshTokenRep
 	return service, mockUserRepo, mockRefreshRepo
 }
 
-// Test Register - Success
 func TestRegister_Success(t *testing.T) {
 	service, mockUserRepo, mockRefreshRepo := setupAuthService()
 
-	// Arrange
 	email := "test@example.com"
 	password := "password123"
 	firstName := "Test"
@@ -108,10 +104,8 @@ func TestRegister_Success(t *testing.T) {
 	mockUserRepo.On("Create", mock.AnythingOfType("*domain.User")).Return(nil)
 	mockRefreshRepo.On("Create", mock.AnythingOfType("*domain.RefreshToken")).Return(nil)
 
-	// Act
 	user, accessToken, refreshToken, err := service.Register(email, password, firstName, lastName, phone, role)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
 	assert.NotEmpty(t, accessToken)
@@ -126,31 +120,24 @@ func TestRegister_Success(t *testing.T) {
 	mockRefreshRepo.AssertExpectations(t)
 }
 
-// Test Register - Invalid Email
 func TestRegister_InvalidEmail(t *testing.T) {
 	service, _, _ := setupAuthService()
 
-	// Act
 	_, _, _, err := service.Register("invalid-email", "password123", "Test", "User", "1234567890", domain.UserRoleCustomer)
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrInvalidEmail, err)
 }
 
-// Test Register - Short Password
 func TestRegister_ShortPassword(t *testing.T) {
 	service, _, _ := setupAuthService()
 
-	// Act
 	_, _, _, err := service.Register("test@example.com", "short", "Test", "User", "1234567890", domain.UserRoleCustomer)
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrInvalidPassword, err)
 }
 
-// Test Register - Email Already Exists
 func TestRegister_EmailExists(t *testing.T) {
 	service, mockUserRepo, _ := setupAuthService()
 
@@ -161,20 +148,16 @@ func TestRegister_EmailExists(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", "test@example.com").Return(existingUser, nil)
 
-	// Act
 	_, _, _, err := service.Register("test@example.com", "password123", "Test", "User", "1234567890", domain.UserRoleCustomer)
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrEmailExists, err)
 	mockUserRepo.AssertExpectations(t)
 }
 
-// Test Login - Success
 func TestLogin_Success(t *testing.T) {
 	service, mockUserRepo, mockRefreshRepo := setupAuthService()
 
-	// Arrange
 	email := "test@example.com"
 	password := "password123"
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -189,10 +172,8 @@ func TestLogin_Success(t *testing.T) {
 	mockUserRepo.On("GetByEmail", email).Return(existingUser, nil)
 	mockRefreshRepo.On("Create", mock.AnythingOfType("*domain.RefreshToken")).Return(nil)
 
-	// Act
 	accessToken, refreshToken, user, err := service.Login(email, password)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, accessToken)
 	assert.NotEmpty(t, refreshToken)
@@ -203,22 +184,18 @@ func TestLogin_Success(t *testing.T) {
 	mockRefreshRepo.AssertExpectations(t)
 }
 
-// Test Login - User Not Found
 func TestLogin_UserNotFound(t *testing.T) {
 	service, mockUserRepo, _ := setupAuthService()
 
 	mockUserRepo.On("GetByEmail", "nonexistent@example.com").Return(nil, gorm.ErrRecordNotFound)
 
-	// Act
 	_, _, _, err := service.Login("nonexistent@example.com", "password123")
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrInvalidCredentials, err)
 	mockUserRepo.AssertExpectations(t)
 }
 
-// Test Login - Wrong Password
 func TestLogin_WrongPassword(t *testing.T) {
 	service, mockUserRepo, _ := setupAuthService()
 
@@ -232,20 +209,16 @@ func TestLogin_WrongPassword(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", "test@example.com").Return(existingUser, nil)
 
-	// Act
 	_, _, _, err := service.Login("test@example.com", "wrongpassword")
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrInvalidCredentials, err)
 	mockUserRepo.AssertExpectations(t)
 }
 
-// Test RefreshToken - Success
 func TestRefreshToken_Success(t *testing.T) {
 	service, mockUserRepo, mockRefreshRepo := setupAuthService()
 
-	// Arrange
 	userID := uuid.New()
 	oldRefreshToken := "old-refresh-token"
 
@@ -266,10 +239,8 @@ func TestRefreshToken_Success(t *testing.T) {
 	mockRefreshRepo.On("DeleteByToken", oldRefreshToken).Return(nil)
 	mockRefreshRepo.On("Create", mock.AnythingOfType("*domain.RefreshToken")).Return(nil)
 
-	// Act
 	newAccessToken, newRefreshToken, err := service.RefreshToken(oldRefreshToken)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, newAccessToken)
 	assert.NotEmpty(t, newRefreshToken)
@@ -279,22 +250,18 @@ func TestRefreshToken_Success(t *testing.T) {
 	mockUserRepo.AssertExpectations(t)
 }
 
-// Test RefreshToken - Token Not Found
 func TestRefreshToken_TokenNotFound(t *testing.T) {
 	service, _, mockRefreshRepo := setupAuthService()
 
 	mockRefreshRepo.On("GetByToken", "invalid-token").Return(nil, gorm.ErrRecordNotFound)
 
-	// Act
 	_, _, err := service.RefreshToken("invalid-token")
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrInvalidRefreshToken, err)
 	mockRefreshRepo.AssertExpectations(t)
 }
 
-// Test RefreshToken - Expired Token
 func TestRefreshToken_ExpiredToken(t *testing.T) {
 	service, _, mockRefreshRepo := setupAuthService()
 
@@ -302,52 +269,43 @@ func TestRefreshToken_ExpiredToken(t *testing.T) {
 		ID:        uuid.New(),
 		UserID:    uuid.New(),
 		Token:     "expired-token",
-		ExpiresAt: time.Now().Add(-time.Hour), // Expired 1 hour ago
+		ExpiresAt: time.Now().Add(-time.Hour),
 	}
 
 	mockRefreshRepo.On("GetByToken", "expired-token").Return(expiredToken, nil)
 	mockRefreshRepo.On("DeleteByToken", "expired-token").Return(nil)
 
-	// Act
 	_, _, err := service.RefreshToken("expired-token")
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrExpiredRefreshToken, err)
 	mockRefreshRepo.AssertExpectations(t)
 }
 
-// Test Logout - Success
 func TestLogout_Success(t *testing.T) {
 	service, _, mockRefreshRepo := setupAuthService()
 
 	refreshToken := "test-refresh-token"
 	mockRefreshRepo.On("DeleteByToken", refreshToken).Return(nil)
 
-	// Act
 	err := service.Logout(refreshToken)
 
-	// Assert
 	assert.NoError(t, err)
 	mockRefreshRepo.AssertExpectations(t)
 }
 
-// Test Logout - Token Not Found (should not fail)
 func TestLogout_TokenNotFound(t *testing.T) {
 	service, _, mockRefreshRepo := setupAuthService()
 
 	mockRefreshRepo.On("DeleteByToken", "nonexistent-token").Return(gorm.ErrRecordNotFound)
 
-	// Act
 	err := service.Logout("nonexistent-token")
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, gorm.ErrRecordNotFound, err)
 	mockRefreshRepo.AssertExpectations(t)
 }
 
-// Test isValidEmail
 func TestIsValidEmail(t *testing.T) {
 	tests := []struct {
 		email    string

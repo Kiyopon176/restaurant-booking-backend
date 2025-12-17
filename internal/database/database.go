@@ -22,7 +22,6 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Configure connection pool
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database instance: %w", err)
@@ -31,13 +30,10 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 
-	// Create custom enum types if they don't exist
 	if err := createEnumTypes(db); err != nil {
 		return nil, fmt.Errorf("failed to create enum types: %w", err)
 	}
 
-	// Auto migrate tables
-	// Ensure required extensions and enum types exist
 	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS pgcrypto;").Error; err != nil {
 		return nil, fmt.Errorf("failed to ensure pgcrypto extension: %w", err)
 	}
@@ -51,7 +47,6 @@ END$$;`).Error; err != nil {
 		return nil, fmt.Errorf("failed to ensure user_role type: %w", err)
 	}
 
-	// Additional enum types used by domain models
 	if err := db.Exec(`DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'cuisine_type') THEN
@@ -83,7 +78,6 @@ END$$;`).Error; err != nil {
 		return nil, fmt.Errorf("failed to ensure location_type type: %w", err)
 	}
 
-	// Auto migrate tables
 	if err := db.AutoMigrate(
 		&domain.User{},
 		&domain.RefreshToken{},

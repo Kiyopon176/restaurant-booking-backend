@@ -1,4 +1,3 @@
-// internal/domain/wallet.go
 package domain
 
 import (

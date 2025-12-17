@@ -17,17 +17,6 @@ func NewUserHandler(userRepo repository.UserRepository) *UserHandler {
 	return &UserHandler{userRepo: userRepo}
 }
 
-// CreateUser godoc
-// @Summary      Создать пользователя
-// @Description  Регистрация нового пользователя
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Param        user body CreateUserRequest true "Данные пользователя"
-// @Success      201 {object} domain.User
-// @Failure      400 {object} ErrorResponse
-// @Failure      500 {object} ErrorResponse
-// @Router       /api/users [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -37,7 +26,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 	user := &domain.User{
 		Email:     req.Email,
-		Password:  req.Password, // TODO: Хешировать пароль!
+		Password:  req.Password,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Phone:     req.Phone,
@@ -54,17 +43,6 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
-// GetUser godoc
-// @Summary      Получить пользователя
-// @Description  Получить информацию о пользователе по ID
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Param        id path string true "User ID"
-// @Success      200 {object} domain.User
-// @Failure      400 {object} ErrorResponse
-// @Failure      404 {object} ErrorResponse
-// @Router       /api/users/{id} [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -83,43 +61,6 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
-
-// ListUsers godoc
-// @Summary      Список пользователей
-// @Description  Получить список всех пользователей
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Param        limit query int false "Лимит" default(10)
-// @Param        offset query int false "Оффсет" default(0)
-// @Success      200 {array} domain.User
-// @Failure      500 {object} ErrorResponse
-// @Router       /api/users [get]
-/*
-func (h *UserHandler) ListUsers(c *gin.Context) {
-	limit := 10
-	offset := 0
-
-	if l := c.Query("limit"); l != "" {
-		fmt.Sscanf(l, "%d", &limit)
-	}
-	if o := c.Query("offset"); o != "" {
-		fmt.Sscanf(o, "%d", &offset)
-	}
-
-	users, err := h.userRepo.List(c.Request.Context(), limit, offset)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	for _, user := range users {
-		user.Password = ""
-	}
-
-	c.JSON(http.StatusOK, users)
-}
-*/
 
 type CreateUserRequest struct {
 	Email     string          `json:"email" binding:"required,email"`

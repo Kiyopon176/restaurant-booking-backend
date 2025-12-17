@@ -1,4 +1,3 @@
-// internal/domain/payment.go
 package domain
 
 import (
