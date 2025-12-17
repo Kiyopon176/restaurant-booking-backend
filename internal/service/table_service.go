@@ -112,7 +112,7 @@ func (s *tableService) GetTablesByRestaurant(ctx context.Context, restaurantID u
 }
 
 func (s *tableService) UpdateTable(ctx context.Context, id uuid.UUID, restaurantID uuid.UUID, ownerID uuid.UUID, req UpdateTableRequest) (*domain.Table, error) {
-	// Verify ownership
+
 	restaurant, err := s.restaurantRepo.GetByID(ctx, restaurantID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -155,7 +155,6 @@ func (s *tableService) UpdateTable(ctx context.Context, id uuid.UUID, restaurant
 		table.MaxCapacity = *req.MaxCapacity
 	}
 
-	// Validate capacity after updates
 	if table.MinCapacity > table.MaxCapacity {
 		return nil, ErrInvalidCapacity
 	}

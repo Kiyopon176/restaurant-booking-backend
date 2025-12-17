@@ -19,17 +19,6 @@ func NewRestaurantHandler(restaurantService service.RestaurantService) *Restaura
 	return &RestaurantHandler{restaurantService: restaurantService}
 }
 
-// CreateRestaurant godoc
-// @Summary Создать ресторан
-// @Description Создать новый ресторан
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param restaurant body CreateRestaurantRequest true "Данные ресторана"
-// @Success 201 {object} domain.Restaurant
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/restaurants [post]
 func (h *RestaurantHandler) CreateRestaurant(c *gin.Context) {
 	var req CreateRestaurantRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -66,17 +55,6 @@ func (h *RestaurantHandler) CreateRestaurant(c *gin.Context) {
 	c.JSON(http.StatusCreated, restaurant)
 }
 
-// GetRestaurant godoc
-// @Summary Получить ресторан
-// @Description Получить информацию о ресторане по ID
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param id path string true "Restaurant ID"
-// @Success 200 {object} domain.Restaurant
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Router /api/restaurants/{id} [get]
 func (h *RestaurantHandler) GetRestaurant(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -99,17 +77,6 @@ func (h *RestaurantHandler) GetRestaurant(c *gin.Context) {
 	c.JSON(http.StatusOK, restaurant)
 }
 
-// ListRestaurants godoc
-// @Summary Список ресторанов
-// @Description Получить список всех ресторанов с пагинацией
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param limit query int false "Количество записей" default(10)
-// @Param offset query int false "Смещение" default(0)
-// @Success 200 {array} domain.Restaurant
-// @Failure 500 {object} ErrorResponse
-// @Router /api/restaurants [get]
 func (h *RestaurantHandler) ListRestaurants(c *gin.Context) {
 	limit := 10
 	offset := 0
@@ -130,21 +97,6 @@ func (h *RestaurantHandler) ListRestaurants(c *gin.Context) {
 	c.JSON(http.StatusOK, restaurants)
 }
 
-// UpdateRestaurant godoc
-// @Summary Обновить ресторан
-// @Description Обновить информацию о ресторане
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param id path string true "Restaurant ID"
-// @Param owner_id query string true "Owner ID"
-// @Param restaurant body UpdateRestaurantRequest true "Данные для обновления"
-// @Success 200 {object} domain.Restaurant
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/restaurants/{id} [put]
 func (h *RestaurantHandler) UpdateRestaurant(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -153,7 +105,6 @@ func (h *RestaurantHandler) UpdateRestaurant(c *gin.Context) {
 		return
 	}
 
-	// Get owner ID from query (in real app, this would come from JWT token)
 	ownerIDStr := c.Query("owner_id")
 	if ownerIDStr == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "owner_id is required"})
@@ -198,19 +149,6 @@ func (h *RestaurantHandler) UpdateRestaurant(c *gin.Context) {
 	c.JSON(http.StatusOK, restaurant)
 }
 
-// DeleteRestaurant godoc
-// @Summary Удалить ресторан (soft delete)
-// @Description Удалить ресторан по ID (устанавливает is_active = false)
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param id path string true "Restaurant ID"
-// @Param owner_id query string true "Owner ID"
-// @Success 204
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Router /api/restaurants/{id} [delete]
 func (h *RestaurantHandler) DeleteRestaurant(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -219,7 +157,6 @@ func (h *RestaurantHandler) DeleteRestaurant(c *gin.Context) {
 		return
 	}
 
-	// Get owner ID from query (in real app, this would come from JWT token)
 	ownerIDStr := c.Query("owner_id")
 	if ownerIDStr == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "owner_id is required"})
@@ -248,22 +185,6 @@ func (h *RestaurantHandler) DeleteRestaurant(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// AddImage godoc
-// @Summary Добавить изображение к ресторану
-// @Description Загрузить изображение для ресторана (mock upload)
-// @Tags restaurants
-// @Accept multipart/form-data
-// @Produce json
-// @Param id path string true "Restaurant ID"
-// @Param owner_id query string true "Owner ID"
-// @Param image formData file true "Файл изображения"
-// @Param is_main formData boolean false "Является ли главным изображением" default(false)
-// @Success 201 {object} domain.RestaurantImage
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/restaurants/{id}/images [post]
 func (h *RestaurantHandler) AddImage(c *gin.Context) {
 	idStr := c.Param("id")
 	restaurantID, err := uuid.Parse(idStr)
@@ -272,7 +193,6 @@ func (h *RestaurantHandler) AddImage(c *gin.Context) {
 		return
 	}
 
-	// Get owner ID from query (in real app, this would come from JWT token)
 	ownerIDStr := c.Query("owner_id")
 	if ownerIDStr == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "owner_id is required"})
@@ -285,17 +205,14 @@ func (h *RestaurantHandler) AddImage(c *gin.Context) {
 		return
 	}
 
-	// Get file from form
 	_, err = c.FormFile("image")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "image file is required"})
 		return
 	}
 
-	// Get is_main flag
 	isMain := c.DefaultPostForm("is_main", "false") == "true"
 
-	// Mock upload - in real app, upload to Cloudinary
 	mockURL := "https://via.placeholder.com/400"
 	mockPublicID := "mock-id"
 
@@ -321,21 +238,6 @@ func (h *RestaurantHandler) AddImage(c *gin.Context) {
 	c.JSON(http.StatusCreated, image)
 }
 
-// DeleteImage godoc
-// @Summary Удалить изображение ресторана
-// @Description Удалить изображение ресторана по ID
-// @Tags restaurants
-// @Accept json
-// @Produce json
-// @Param id path string true "Restaurant ID"
-// @Param image_id path string true "Image ID"
-// @Param owner_id query string true "Owner ID"
-// @Success 204
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/restaurants/{id}/images/{image_id} [delete]
 func (h *RestaurantHandler) DeleteImage(c *gin.Context) {
 	idStr := c.Param("id")
 	restaurantID, err := uuid.Parse(idStr)
@@ -351,7 +253,6 @@ func (h *RestaurantHandler) DeleteImage(c *gin.Context) {
 		return
 	}
 
-	// Get owner ID from query (in real app, this would come from JWT token)
 	ownerIDStr := c.Query("owner_id")
 	if ownerIDStr == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "owner_id is required"})

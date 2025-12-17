@@ -49,7 +49,6 @@ func (s *walletService) GetOrCreateWallet(ctx context.Context, userID uuid.UUID)
 		return nil, err
 	}
 
-	// Create new wallet
 	wallet = &domain.Wallet{
 		UserID:  userID,
 		Balance: 0,
@@ -79,7 +78,6 @@ func (s *walletService) Deposit(ctx context.Context, userID uuid.UUID, amount in
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
-		// Get or create wallet with row lock
 		var wallet domain.Wallet
 		err := tx.WithContext(ctx).
 			Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -88,7 +86,7 @@ func (s *walletService) Deposit(ctx context.Context, userID uuid.UUID, amount in
 
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Create new wallet
+
 				wallet = domain.Wallet{
 					UserID:  userID,
 					Balance: 0,
@@ -101,13 +99,11 @@ func (s *walletService) Deposit(ctx context.Context, userID uuid.UUID, amount in
 			}
 		}
 
-		// Update balance
 		wallet.Balance += amount
 		if err := tx.WithContext(ctx).Save(&wallet).Error; err != nil {
 			return err
 		}
 
-		// Create transaction record
 		transaction := &domain.WalletTransaction{
 			WalletID:    wallet.ID,
 			Amount:      amount,
@@ -125,7 +121,6 @@ func (s *walletService) Withdraw(ctx context.Context, userID uuid.UUID, amount i
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
-		// Get wallet with row lock
 		var wallet domain.Wallet
 		err := tx.WithContext(ctx).
 			Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -136,18 +131,15 @@ func (s *walletService) Withdraw(ctx context.Context, userID uuid.UUID, amount i
 			return err
 		}
 
-		// Check balance
 		if wallet.Balance < amount {
 			return ErrInsufficientBalance
 		}
 
-		// Update balance
 		wallet.Balance -= amount
 		if err := tx.WithContext(ctx).Save(&wallet).Error; err != nil {
 			return err
 		}
 
-		// Create transaction record
 		transaction := &domain.WalletTransaction{
 			WalletID:    wallet.ID,
 			Amount:      amount,
@@ -165,7 +157,6 @@ func (s *walletService) ChargeForBooking(ctx context.Context, userID uuid.UUID, 
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
-		// Get wallet with row lock
 		var wallet domain.Wallet
 		err := tx.WithContext(ctx).
 			Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -176,18 +167,15 @@ func (s *walletService) ChargeForBooking(ctx context.Context, userID uuid.UUID, 
 			return err
 		}
 
-		// Check balance
 		if wallet.Balance < amount {
 			return ErrInsufficientBalance
 		}
 
-		// Update balance
 		wallet.Balance -= amount
 		if err := tx.WithContext(ctx).Save(&wallet).Error; err != nil {
 			return err
 		}
 
-		// Create transaction record
 		transaction := &domain.WalletTransaction{
 			WalletID:    wallet.ID,
 			Amount:      amount,
@@ -206,7 +194,6 @@ func (s *walletService) RefundBooking(ctx context.Context, userID uuid.UUID, amo
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
-		// Get or create wallet with row lock
 		var wallet domain.Wallet
 		err := tx.WithContext(ctx).
 			Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -227,13 +214,11 @@ func (s *walletService) RefundBooking(ctx context.Context, userID uuid.UUID, amo
 			}
 		}
 
-		// Update balance
 		wallet.Balance += amount
 		if err := tx.WithContext(ctx).Save(&wallet).Error; err != nil {
 			return err
 		}
 
-		// Create transaction record
 		transaction := &domain.WalletTransaction{
 			WalletID:    wallet.ID,
 			Amount:      amount,

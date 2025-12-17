@@ -23,7 +23,7 @@ func NewAuthMiddleware(jwtManager *jwt.Manager, userRepo repository.UserReposito
 
 func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Extract token from Authorization header
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
@@ -31,7 +31,6 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		// Parse Bearer token
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
@@ -41,7 +40,6 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 
 		tokenString := parts[1]
 
-		// Validate token
 		claims, err := m.jwtManager.ValidateAccessToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
@@ -49,7 +47,6 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		// Check if user exists
 		user, err := m.userRepo.GetByID(claims.UserID)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
@@ -57,7 +54,6 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		// Set user info in context
 		c.Set("user_id", user.ID)
 		c.Set("user_role", user.Role)
 		c.Set("user", user)

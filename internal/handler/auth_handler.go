@@ -72,7 +72,6 @@ type MessageResponse struct {
 	Message string `json:"message"`
 }
 
-
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

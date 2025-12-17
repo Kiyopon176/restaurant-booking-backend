@@ -70,17 +70,14 @@ func (s *userService) ChangePassword(id uuid.UUID, oldPassword, newPassword stri
 		return err
 	}
 
-	// Verify old password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
 		return ErrOldPasswordIncorrect
 	}
 
-	// Validate new password length
 	if len(newPassword) < 8 {
 		return ErrInvalidPassword
 	}
 
-	// Hash new password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err

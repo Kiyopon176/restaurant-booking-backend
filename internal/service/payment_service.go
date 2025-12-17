@@ -62,12 +62,11 @@ func (s *paymentService) CreatePayment(ctx context.Context, userID uuid.UUID, am
 		return nil, err
 	}
 
-	// If wallet payment, process immediately
 	if method == domain.PaymentMethodWallet {
 		if err := s.ProcessWalletPayment(ctx, payment.ID); err != nil {
 			return nil, err
 		}
-		// Reload payment to get updated status
+
 		payment, _ = s.paymentRepo.GetByID(ctx, payment.ID)
 	}
 
@@ -82,14 +81,13 @@ func (s *paymentService) ProcessWalletPayment(ctx context.Context, paymentID uui
 		}
 
 		if payment.PaymentStatus == domain.PaymentStatusCompleted {
-			return nil // Already processed
+			return nil
 		}
 
 		if payment.PaymentStatus != domain.PaymentStatusPending {
 			return fmt.Errorf("%w: %s", ErrInvalidPaymentStatus, payment.PaymentStatus)
 		}
 
-		// Charge wallet
 		var bookingID uuid.UUID
 		if payment.BookingID != nil {
 			bookingID = *payment.BookingID
@@ -103,7 +101,6 @@ func (s *paymentService) ProcessWalletPayment(ctx context.Context, paymentID uui
 			return err
 		}
 
-		// Update payment status
 		payment.PaymentStatus = domain.PaymentStatusCompleted
 		return s.paymentRepo.Update(ctx, payment)
 	})
@@ -119,7 +116,6 @@ func (s *paymentService) CreateHalykPayment(ctx context.Context, paymentID uuid.
 		return "", ErrInvalidPaymentStatus
 	}
 
-	// Generate external payment ID and URL (mock)
 	externalID := uuid.New().String()
 	url := fmt.Sprintf("https://halyk-mock.kz/pay/%s", externalID)
 
@@ -143,7 +139,6 @@ func (s *paymentService) CreateKaspiPayment(ctx context.Context, paymentID uuid.
 		return "", ErrInvalidPaymentStatus
 	}
 
-	// Generate external payment ID and URL (mock)
 	externalID := uuid.New().String()
 	url := fmt.Sprintf("https://kaspi-mock.kz/pay/%s", externalID)
 
@@ -169,7 +164,7 @@ func (s *paymentService) ProcessExternalPaymentCallback(ctx context.Context, ext
 		}
 
 		if payment.PaymentStatus == domain.PaymentStatusCompleted {
-			return nil // Idempotent - already processed
+			return nil
 		}
 
 		if payment.PaymentStatus != domain.PaymentStatusPending {
@@ -182,7 +177,6 @@ func (s *paymentService) ProcessExternalPaymentCallback(ctx context.Context, ext
 				return err
 			}
 
-			// Top-up wallet for external payments
 			if payment.PaymentMethod == domain.PaymentMethodHalyk || payment.PaymentMethod == domain.PaymentMethodKaspi {
 				desc := fmt.Sprintf("Top-up via %s (Payment ID: %s)", payment.PaymentMethod, payment.ID)
 				return s.walletService.Deposit(ctx, payment.UserID, payment.Amount, desc)
@@ -206,14 +200,13 @@ func (s *paymentService) RefundPayment(ctx context.Context, paymentID uuid.UUID)
 		}
 
 		if payment.PaymentStatus == domain.PaymentStatusRefunded {
-			return nil // Already refunded
+			return nil
 		}
 
 		if payment.PaymentStatus != domain.PaymentStatusCompleted {
 			return errors.New("can only refund completed payments")
 		}
 
-		// Refund to wallet
 		var bookingID uuid.UUID
 		if payment.BookingID != nil {
 			bookingID = *payment.BookingID
@@ -224,7 +217,6 @@ func (s *paymentService) RefundPayment(ctx context.Context, paymentID uuid.UUID)
 			return err
 		}
 
-		// Update payment status
 		payment.PaymentStatus = domain.PaymentStatusRefunded
 		return s.paymentRepo.Update(ctx, payment)
 	})

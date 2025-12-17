@@ -19,17 +19,6 @@ func NewPaymentHandler(paymentService service.PaymentService) *PaymentHandler {
 	return &PaymentHandler{paymentService: paymentService}
 }
 
-// CreateWalletPayment godoc
-// @Summary Создать платеж через кошелек
-// @Description Создать и обработать платеж через кошелек
-// @Tags payments
-// @Accept json
-// @Produce json
-// @Param request body CreatePaymentRequest true "Данные платежа"
-// @Success 200 {object} domain.Payment
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/payments/wallet [post]
 func (h *PaymentHandler) CreateWalletPayment(c *gin.Context) {
 	var req CreatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -71,17 +60,6 @@ func (h *PaymentHandler) CreateWalletPayment(c *gin.Context) {
 	c.JSON(http.StatusOK, payment)
 }
 
-// CreateHalykPayment godoc
-// @Summary Создать платеж через Halyk
-// @Description Создать платеж через Halyk Bank
-// @Tags payments
-// @Accept json
-// @Produce json
-// @Param request body CreatePaymentRequest true "Данные платежа"
-// @Success 200 {object} PaymentWithURLResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/payments/halyk [post]
 func (h *PaymentHandler) CreateHalykPayment(c *gin.Context) {
 	var req CreatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -128,17 +106,6 @@ func (h *PaymentHandler) CreateHalykPayment(c *gin.Context) {
 	})
 }
 
-// CreateKaspiPayment godoc
-// @Summary Создать платеж через Kaspi
-// @Description Создать платеж через Kaspi
-// @Tags payments
-// @Accept json
-// @Produce json
-// @Param request body CreatePaymentRequest true "Данные платежа"
-// @Success 200 {object} PaymentWithURLResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/payments/kaspi [post]
 func (h *PaymentHandler) CreateKaspiPayment(c *gin.Context) {
 	var req CreatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -185,15 +152,6 @@ func (h *PaymentHandler) CreateKaspiPayment(c *gin.Context) {
 	})
 }
 
-// HalykWebhook godoc
-// @Summary Webhook для Halyk Bank
-// @Description Обработка callback от Halyk Bank
-// @Tags payments
-// @Accept json
-// @Produce json
-// @Param request body WebhookRequest true "Webhook данные"
-// @Success 200 {object} SuccessResponse
-// @Router /api/payments/webhook/halyk [post]
 func (h *PaymentHandler) HalykWebhook(c *gin.Context) {
 	var req WebhookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -208,36 +166,16 @@ func (h *PaymentHandler) HalykWebhook(c *gin.Context) {
 		req.ExternalPaymentID,
 		success,
 	); err != nil {
-		// Log error but return OK for idempotency
+
 	}
 
 	c.JSON(http.StatusOK, SuccessResponse{Message: "ok"})
 }
 
-// KaspiWebhook godoc
-// @Summary Webhook для Kaspi
-// @Description Обработка callback от Kaspi
-// @Tags payments
-// @Accept json
-// @Produce json
-// @Param request body WebhookRequest true "Webhook данные"
-// @Success 200 {object} SuccessResponse
-// @Router /api/payments/webhook/kaspi [post]
 func (h *PaymentHandler) KaspiWebhook(c *gin.Context) {
-	h.HalykWebhook(c) // Same implementation
+	h.HalykWebhook(c)
 }
 
-// RefundPayment godoc
-// @Summary Вернуть платеж
-// @Description Вернуть средства за платеж
-// @Tags payments
-// @Accept json
-// @Produce json
-// @Param id path string true "Payment ID"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/payments/{id}/refund [post]
 func (h *PaymentHandler) RefundPayment(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -254,19 +192,6 @@ func (h *PaymentHandler) RefundPayment(c *gin.Context) {
 	c.JSON(http.StatusOK, SuccessResponse{Message: "refunded"})
 }
 
-// GetUserPayments godoc
-// @Summary Получить платежи пользователя
-// @Description Получить историю платежей пользователя
-// @Tags payments
-// @Accept json
-// @Produce json
-// @Param user_id query string true "User ID"
-// @Param limit query int false "Limit" default(10)
-// @Param offset query int false "Offset" default(0)
-// @Success 200 {array} domain.Payment
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/payments [get]
 func (h *PaymentHandler) GetUserPayments(c *gin.Context) {
 	userIDStr := c.Query("user_id")
 	if userIDStr == "" {
@@ -299,7 +224,6 @@ func (h *PaymentHandler) GetUserPayments(c *gin.Context) {
 	c.JSON(http.StatusOK, payments)
 }
 
-// Request types
 type CreatePaymentRequest struct {
 	UserID    string `json:"user_id" binding:"required"`
 	Amount    int    `json:"amount" binding:"required,min=1"`

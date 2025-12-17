@@ -22,18 +22,6 @@ func NewBookingHandler(bookingRepo repository.BookingRepository, tableRepo repos
 	}
 }
 
-// CreateBooking godoc
-// @Summary Создать бронирование
-// @Description Создать новое бронирование столика в ресторане
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param booking body CreateBookingRequest true "Данные бронирования"
-// @Success 201 {object} domain.Booking
-// @Failure 400 {object} ErrorResponse
-// @Failure 409 {object} ErrorResponse "Столик недоступен"
-// @Failure 500 {object} ErrorResponse
-// @Router /api/bookings [post]
 func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	var req CreateBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -77,17 +65,6 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	c.JSON(http.StatusCreated, booking)
 }
 
-// GetBooking godoc
-// @Summary Получить бронирование
-// @Description Получить информацию о бронировании по ID
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param id path string true "Booking ID"
-// @Success 200 {object} domain.Booking
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Router /api/bookings/{id} [get]
 func (h *BookingHandler) GetBooking(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -105,17 +82,6 @@ func (h *BookingHandler) GetBooking(c *gin.Context) {
 	c.JSON(http.StatusOK, booking)
 }
 
-// GetUserBookings godoc
-// @Summary Получить бронирования пользователя
-// @Description Получить все бронирования определенного пользователя
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param user_id path string true "User ID"
-// @Success 200 {array} domain.Booking
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/users/{user_id}/bookings [get]
 func (h *BookingHandler) GetUserBookings(c *gin.Context) {
 	idStr := c.Param("user_id")
 	userID, err := uuid.Parse(idStr)
@@ -133,18 +99,6 @@ func (h *BookingHandler) GetUserBookings(c *gin.Context) {
 	c.JSON(http.StatusOK, bookings)
 }
 
-// GetRestaurantBookings godoc
-// @Summary Получить бронирования ресторана
-// @Description Получить все бронирования ресторана на определенную дату
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param id path string true "Restaurant ID"
-// @Param date query string true "Дата в формате YYYY-MM-DD"
-// @Success 200 {array} domain.Booking
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/restaurants/{id}/bookings [get]
 func (h *BookingHandler) GetRestaurantBookings(c *gin.Context) {
 	idStr := c.Param("id")
 	restaurantID, err := uuid.Parse(idStr)
@@ -169,19 +123,6 @@ func (h *BookingHandler) GetRestaurantBookings(c *gin.Context) {
 	c.JSON(http.StatusOK, bookings)
 }
 
-// UpdateBookingStatus godoc
-// @Summary Обновить статус бронирования
-// @Description Обновить статус бронирования (pending, confirmed, cancelled, completed, no_show)
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param id path string true "Booking ID"
-// @Param status body UpdateBookingStatusRequest true "Новый статус"
-// @Success 200 {object} domain.Booking
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/bookings/{id}/status [put]
 func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -212,18 +153,6 @@ func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, booking)
 }
 
-// CancelBooking godoc
-// @Summary Отменить бронирование
-// @Description Отменить бронирование (установить статус cancelled)
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param id path string true "Booking ID"
-// @Success 200 {object} domain.Booking
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/bookings/{id}/cancel [put]
 func (h *BookingHandler) CancelBooking(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -248,19 +177,6 @@ func (h *BookingHandler) CancelBooking(c *gin.Context) {
 	c.JSON(http.StatusOK, booking)
 }
 
-// CheckTableAvailability godoc
-// @Summary Проверить доступность столика
-// @Description Проверить, доступен ли столик для бронирования на указанное время
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param table_id query string true "Table ID"
-// @Param start_time query string true "Время начала (RFC3339 format)"
-// @Param end_time query string true "Время окончания (RFC3339 format)"
-// @Success 200 {object} AvailabilityResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/bookings/check-availability [get]
 func (h *BookingHandler) CheckTableAvailability(c *gin.Context) {
 	tableIDStr := c.Query("table_id")
 	tableID, err := uuid.Parse(tableIDStr)

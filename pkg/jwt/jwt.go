@@ -37,7 +37,6 @@ func NewManager(secret string, accessExpire, refreshExpire time.Duration) *Manag
 	}
 }
 
-// GenerateAccessToken creates a new JWT access token
 func (m *Manager) GenerateAccessToken(userID uuid.UUID, role domain.UserRole) (string, error) {
 	now := time.Now()
 	claims := Claims{
@@ -54,7 +53,6 @@ func (m *Manager) GenerateAccessToken(userID uuid.UUID, role domain.UserRole) (s
 	return token.SignedString([]byte(m.secret))
 }
 
-// GenerateRefreshToken creates a new random refresh token
 func (m *Manager) GenerateRefreshToken() (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
@@ -63,7 +61,6 @@ func (m *Manager) GenerateRefreshToken() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
-// ValidateAccessToken validates and parses the JWT token
 func (m *Manager) ValidateAccessToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -87,7 +84,6 @@ func (m *Manager) ValidateAccessToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
-// ParseToken parses the token without validation
 func (m *Manager) ParseToken(tokenString string) (*Claims, error) {
 	token, _, err := jwt.NewParser().ParseUnverified(tokenString, &Claims{})
 	if err != nil {
@@ -102,7 +98,6 @@ func (m *Manager) ParseToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
-// GetRefreshExpire returns the refresh token expiration duration
 func (m *Manager) GetRefreshExpire() time.Duration {
 	return m.refreshExpire
 }

@@ -14,7 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Mock PaymentRepository
 type MockPaymentRepository struct {
 	mock.Mock
 }
@@ -53,7 +52,6 @@ func (m *MockPaymentRepository) Update(ctx context.Context, payment *domain.Paym
 	return args.Error(0)
 }
 
-// Mock WalletService
 type MockWalletService struct {
 	mock.Mock
 }
@@ -99,12 +97,10 @@ func (m *MockWalletService) GetTransactions(ctx context.Context, userID uuid.UUI
 	return args.Get(0).([]*domain.WalletTransaction), args.Error(1)
 }
 
-// Helper function
 func setupPaymentService() (*paymentService, *MockPaymentRepository, *MockWalletService, sqlmock.Sqlmock, *gorm.DB) {
 	mockPaymentRepo := new(MockPaymentRepository)
 	mockWalletService := new(MockWalletService)
 
-	// Setup sqlmock for transaction testing
 	sqlDB, mock, _ := sqlmock.New()
 	dialector := postgres.New(postgres.Config{
 		Conn:       sqlDB,
@@ -121,12 +117,10 @@ func setupPaymentService() (*paymentService, *MockPaymentRepository, *MockWallet
 	return service, mockPaymentRepo, mockWalletService, mock, db
 }
 
-// Test CreatePayment - Wallet Payment Success
 func TestCreatePayment_WalletPayment_Success(t *testing.T) {
 	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	userID := uuid.New()
 	bookingID := uuid.New()
 	amount := 10000
@@ -144,36 +138,29 @@ func TestCreatePayment_WalletPayment_Success(t *testing.T) {
 	mockPaymentRepo.On("Update", ctx, mock.AnythingOfType("*domain.Payment")).Return(nil)
 	mock.ExpectCommit()
 
-	// Act
 	payment, err := service.CreatePayment(ctx, userID, amount, domain.PaymentMethodWallet, &bookingID)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, payment)
 	assert.Equal(t, amount, payment.Amount)
 	mockPaymentRepo.AssertExpectations(t)
 }
 
-// Test CreatePayment - Invalid Amount
 func TestCreatePayment_InvalidAmount(t *testing.T) {
 	service, _, _, _, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Act
 	payment, err := service.CreatePayment(ctx, uuid.New(), 0, domain.PaymentMethodWallet, nil)
 
-	// Assert
 	assert.Error(t, err)
 	assert.Nil(t, payment)
 	assert.Equal(t, ErrInvalidAmount, err)
 }
 
-// Test ProcessWalletPayment - Success
 func TestProcessWalletPayment_Success(t *testing.T) {
 	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	paymentID := uuid.New()
 	userID := uuid.New()
 	bookingID := uuid.New()
@@ -194,22 +181,18 @@ func TestProcessWalletPayment_Success(t *testing.T) {
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 	mock.ExpectCommit()
 
-	// Act
 	err := service.ProcessWalletPayment(ctx, paymentID)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.Equal(t, domain.PaymentStatusCompleted, payment.PaymentStatus)
 	mockPaymentRepo.AssertExpectations(t)
 	mockWalletService.AssertExpectations(t)
 }
 
-// Test ProcessWalletPayment - Insufficient Balance
 func TestProcessWalletPayment_InsufficientBalance(t *testing.T) {
 	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	paymentID := uuid.New()
 	userID := uuid.New()
 	bookingID := uuid.New()
@@ -229,10 +212,8 @@ func TestProcessWalletPayment_InsufficientBalance(t *testing.T) {
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 	mock.ExpectRollback()
 
-	// Act
 	err := service.ProcessWalletPayment(ctx, paymentID)
 
-	// Assert
 	assert.Error(t, err)
 	assert.Equal(t, ErrInsufficientBalance, err)
 	assert.Equal(t, domain.PaymentStatusFailed, payment.PaymentStatus)
@@ -240,12 +221,10 @@ func TestProcessWalletPayment_InsufficientBalance(t *testing.T) {
 	mockWalletService.AssertExpectations(t)
 }
 
-// Test CreateHalykPayment - Success
 func TestCreateHalykPayment_Success(t *testing.T) {
 	service, mockPaymentRepo, _, _, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	paymentID := uuid.New()
 	payment := &domain.Payment{
 		ID:            paymentID,
@@ -256,10 +235,8 @@ func TestCreateHalykPayment_Success(t *testing.T) {
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 
-	// Act
 	url, err := service.CreateHalykPayment(ctx, paymentID)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, url)
 	assert.Contains(t, url, "halyk-mock.kz")
@@ -268,12 +245,10 @@ func TestCreateHalykPayment_Success(t *testing.T) {
 	mockPaymentRepo.AssertExpectations(t)
 }
 
-// Test CreateKaspiPayment - Success
 func TestCreateKaspiPayment_Success(t *testing.T) {
 	service, mockPaymentRepo, _, _, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	paymentID := uuid.New()
 	payment := &domain.Payment{
 		ID:            paymentID,
@@ -284,10 +259,8 @@ func TestCreateKaspiPayment_Success(t *testing.T) {
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 
-	// Act
 	url, err := service.CreateKaspiPayment(ctx, paymentID)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.NotEmpty(t, url)
 	assert.Contains(t, url, "kaspi-mock.kz")
@@ -296,12 +269,10 @@ func TestCreateKaspiPayment_Success(t *testing.T) {
 	mockPaymentRepo.AssertExpectations(t)
 }
 
-// Test ProcessExternalPaymentCallback - Success
 func TestProcessExternalPaymentCallback_Success(t *testing.T) {
 	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	externalID := "external-123"
 	userID := uuid.New()
 	amount := 10000
@@ -321,22 +292,18 @@ func TestProcessExternalPaymentCallback_Success(t *testing.T) {
 	mockWalletService.On("Deposit", ctx, userID, amount, mock.AnythingOfType("string")).Return(nil)
 	mock.ExpectCommit()
 
-	// Act
 	err := service.ProcessExternalPaymentCallback(ctx, externalID, true)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.Equal(t, domain.PaymentStatusCompleted, payment.PaymentStatus)
 	mockPaymentRepo.AssertExpectations(t)
 	mockWalletService.AssertExpectations(t)
 }
 
-// Test ProcessExternalPaymentCallback - Failed Payment
 func TestProcessExternalPaymentCallback_Failed(t *testing.T) {
 	service, mockPaymentRepo, _, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	externalID := "external-123"
 	payment := &domain.Payment{
 		ID:                uuid.New(),
@@ -350,22 +317,18 @@ func TestProcessExternalPaymentCallback_Failed(t *testing.T) {
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 	mock.ExpectCommit()
 
-	// Act
 	err := service.ProcessExternalPaymentCallback(ctx, externalID, false)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.Equal(t, domain.PaymentStatusFailed, payment.PaymentStatus)
 	assert.NotNil(t, payment.ErrorMessage)
 	mockPaymentRepo.AssertExpectations(t)
 }
 
-// Test RefundPayment - Success
 func TestRefundPayment_Success(t *testing.T) {
 	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	paymentID := uuid.New()
 	userID := uuid.New()
 	bookingID := uuid.New()
@@ -385,22 +348,18 @@ func TestRefundPayment_Success(t *testing.T) {
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 	mock.ExpectCommit()
 
-	// Act
 	err := service.RefundPayment(ctx, paymentID)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.Equal(t, domain.PaymentStatusRefunded, payment.PaymentStatus)
 	mockPaymentRepo.AssertExpectations(t)
 	mockWalletService.AssertExpectations(t)
 }
 
-// Test RefundPayment - Already Refunded (Idempotent)
 func TestRefundPayment_AlreadyRefunded(t *testing.T) {
 	service, mockPaymentRepo, _, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	paymentID := uuid.New()
 	payment := &domain.Payment{
 		ID:            paymentID,
@@ -411,20 +370,16 @@ func TestRefundPayment_AlreadyRefunded(t *testing.T) {
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
 	mock.ExpectCommit()
 
-	// Act
 	err := service.RefundPayment(ctx, paymentID)
 
-	// Assert
 	assert.NoError(t, err)
 	mockPaymentRepo.AssertExpectations(t)
 }
 
-// Test RefundPayment - Invalid Status
 func TestRefundPayment_InvalidStatus(t *testing.T) {
 	service, mockPaymentRepo, _, mock, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	paymentID := uuid.New()
 	payment := &domain.Payment{
 		ID:            paymentID,
@@ -435,21 +390,17 @@ func TestRefundPayment_InvalidStatus(t *testing.T) {
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
 	mock.ExpectRollback()
 
-	// Act
 	err := service.RefundPayment(ctx, paymentID)
 
-	// Assert
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "can only refund completed payments")
 	mockPaymentRepo.AssertExpectations(t)
 }
 
-// Test GetPaymentsByUser
 func TestGetPaymentsByUser(t *testing.T) {
 	service, mockPaymentRepo, _, _, _ := setupPaymentService()
 	ctx := context.Background()
 
-	// Arrange
 	userID := uuid.New()
 	payments := []*domain.Payment{
 		{ID: uuid.New(), UserID: userID},
@@ -458,10 +409,8 @@ func TestGetPaymentsByUser(t *testing.T) {
 
 	mockPaymentRepo.On("GetByUserID", ctx, userID, 10, 0).Return(payments, nil)
 
-	// Act
 	result, err := service.GetPaymentsByUser(ctx, userID, 10, 0)
 
-	// Assert
 	assert.NoError(t, err)
 	assert.Len(t, result, 2)
 	mockPaymentRepo.AssertExpectations(t)
