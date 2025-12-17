@@ -108,7 +108,6 @@ func (s *BookingService) CheckMultipleTablesAvailability(
 			defer wg.Done()
 
 			time.Sleep(50 * time.Millisecond)
-			available := time.Now().UnixNano()%2 == 0
 
 			resultsChan <- struct {
 				TableID   uuid.UUID
@@ -164,7 +163,6 @@ func (s *BookingService) ProcessBulkBookings(
 }
 
 func (s *BookingService) processBooking(ctx context.Context, booking *domain.Booking) error {
-
 	time.Sleep(100 * time.Millisecond)
 
 	select {
