@@ -19,6 +19,12 @@ import (
 	_ "restaurant-booking/docs"
 )
 
+// @title Restaurant Booking API
+// @version 1.0
+// @description API для системы бронирования столиков в ресторанах
+// @host localhost:8080
+// @BasePath /
+// @schemes http
 func main() {
 
 	cfg, err := config.Load()
@@ -65,6 +71,27 @@ func main() {
 
 	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
 
+	// 🚀 Initialize Concurrent Services (Goroutines & Channels)
+	concurrentServices := SetupConcurrentServices(
+		refreshTokenRepo,
+		bookingRepo,
+		tableRepo,
+		restaurantRepo,
+	)
+
+	// Setup graceful shutdown
+	StartGracefulShutdown(concurrentServices)
+
+	// Demo concurrent features (optional - можно закомментировать)
+	DemoConcurrentFeatures(concurrentServices)
+
+	// Initialize concurrent demo handler
+	concurrentDemoHandler := handler.NewConcurrentDemoHandler(
+		concurrentServices.NotificationSvc,
+		concurrentServices.BookingSvc,
+	)
+
+	// Setup Gin router
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -169,6 +196,16 @@ func main() {
 			payments.POST("/webhook/halyk", paymentHandler.HalykWebhook)
 			payments.POST("/webhook/kaspi", paymentHandler.KaspiWebhook)
 			payments.POST("/:id/refund", paymentHandler.RefundPayment)
+		}
+
+		// 🚀 Concurrent Demo Routes (Goroutines & Channels Examples)
+		demo := api.Group("/demo")
+		{
+			demo.POST("/bulk-notifications", concurrentDemoHandler.SendBulkNotifications)
+			demo.GET("/notification-stats", concurrentDemoHandler.GetNotificationStats)
+			demo.POST("/check-availability", concurrentDemoHandler.CheckTablesAvailability)
+			demo.GET("/booking-stats/:restaurant_id", concurrentDemoHandler.GetBookingStats)
+			demo.POST("/search-tables", concurrentDemoHandler.SearchAvailableTables)
 		}
 	}
 
