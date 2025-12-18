@@ -71,7 +71,6 @@ func main() {
 
 	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
 
-	// 🚀 Initialize Concurrent Services (Goroutines & Channels)
 	concurrentServices := SetupConcurrentServices(
 		refreshTokenRepo,
 		bookingRepo,
@@ -79,19 +78,13 @@ func main() {
 		restaurantRepo,
 	)
 
-	// Setup graceful shutdown
 	StartGracefulShutdown(concurrentServices)
 
-	// Demo concurrent features (optional - можно закомментировать)
-	DemoConcurrentFeatures(concurrentServices)
-
-	// Initialize concurrent demo handler
 	concurrentDemoHandler := handler.NewConcurrentDemoHandler(
 		concurrentServices.NotificationSvc,
 		concurrentServices.BookingSvc,
 	)
 
-	// Setup Gin router
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -198,7 +191,6 @@ func main() {
 			payments.POST("/:id/refund", paymentHandler.RefundPayment)
 		}
 
-		// 🚀 Concurrent Demo Routes (Goroutines & Channels Examples)
 		demo := api.Group("/demo")
 		{
 			demo.POST("/bulk-notifications", concurrentDemoHandler.SendBulkNotifications)

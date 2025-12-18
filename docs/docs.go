@@ -15,9 +15,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/bookings": {
+        "/api/demo/booking-stats/{restaurant_id}": {
+            "get": {
+                "description": "Get booking statistics for a restaurant (calculated in parallel)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Demo - Concurrent Features"
+                ],
+                "summary": "Get booking statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "restaurant_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.BookingStatsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/demo/bulk-notifications": {
             "post": {
-                "description": "Создать новое бронирование столика в ресторане",
+                "description": "Send notifications to multiple recipients concurrently",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,89 +66,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bookings"
+                    "Demo - Concurrent Features"
                 ],
-                "summary": "Создать бронирование",
+                "summary": "Send bulk notifications",
                 "parameters": [
                     {
-                        "description": "Данные бронирования",
-                        "name": "booking",
+                        "description": "Bulk notification request",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CreateBookingRequest"
+                            "$ref": "#/definitions/handler.BulkNotificationRequest"
                         }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Booking"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Столик недоступен",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/bookings/check-availability": {
-            "get": {
-                "description": "Проверить, доступен ли столик для бронирования на указанное время",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Проверить доступность столика",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Table ID",
-                        "name": "table_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Время начала (RFC3339 format)",
-                        "name": "start_time",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Время окончания (RFC3339 format)",
-                        "name": "end_time",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.AvailabilityResponse"
+                            "$ref": "#/definitions/handler.SuccessResponse"
                         }
                     },
                     "400": {
@@ -125,9 +102,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/bookings/{id}": {
-            "get": {
-                "description": "Получить информацию о бронировании по ID",
+        "/api/demo/check-availability": {
+            "post": {
+                "description": "Check availability of multiple tables concurrently",
                 "consumes": [
                     "application/json"
                 ],
@@ -135,118 +112,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bookings"
+                    "Demo - Concurrent Features"
                 ],
-                "summary": "Получить бронирование",
+                "summary": "Check multiple tables availability",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Booking ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Booking"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/bookings/{id}/cancel": {
-            "put": {
-                "description": "Отменить бронирование (установить статус cancelled)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Отменить бронирование",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Booking ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Booking"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/bookings/{id}/status": {
-            "put": {
-                "description": "Обновить статус бронирования (pending, confirmed, cancelled, completed, no_show)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Обновить статус бронирования",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Booking ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Новый статус",
-                        "name": "status",
+                        "description": "Check availability request",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.UpdateBookingStatusRequest"
+                            "$ref": "#/definitions/handler.CheckAvailabilityRequest"
                         }
                     }
                 ],
@@ -254,7 +130,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Booking"
+                            "$ref": "#/definitions/handler.ConcurrentAvailabilityResponse"
                         }
                     },
                     "400": {
@@ -262,15 +138,63 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
-                    },
-                    "404": {
-                        "description": "Not Found",
+                    }
+                }
+            }
+        },
+        "/api/demo/notification-stats": {
+            "get": {
+                "description": "Get statistics of sent and failed notifications",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Demo - Concurrent Features"
+                ],
+                "summary": "Get notification statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "$ref": "#/definitions/handler.NotificationStatsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/demo/search-tables": {
+            "post": {
+                "description": "Search for available tables across multiple restaurants in parallel",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Demo - Concurrent Features"
+                ],
+                "summary": "Search available tables across restaurants",
+                "parameters": [
+                    {
+                        "description": "Search tables request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.SearchTablesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SearchTablesResponse"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -280,17 +204,14 @@ const docTemplate = `{
         },
         "/api/payments": {
             "get": {
-                "description": "Получить историю платежей пользователя",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Get payment history for a user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "payments"
+                    "Payments"
                 ],
-                "summary": "Получить платежи пользователя",
+                "summary": "Get user payments",
                 "parameters": [
                     {
                         "type": "string",
@@ -341,7 +262,7 @@ const docTemplate = `{
         },
         "/api/payments/halyk": {
             "post": {
-                "description": "Создать платеж через Halyk Bank",
+                "description": "Create payment via Halyk Bank (returns payment URL)",
                 "consumes": [
                     "application/json"
                 ],
@@ -349,12 +270,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "payments"
+                    "Payments"
                 ],
-                "summary": "Создать платеж через Halyk",
+                "summary": "Create Halyk Bank payment",
                 "parameters": [
                     {
-                        "description": "Данные платежа",
+                        "description": "Payment request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -387,7 +308,7 @@ const docTemplate = `{
         },
         "/api/payments/kaspi": {
             "post": {
-                "description": "Создать платеж через Kaspi",
+                "description": "Create payment via Kaspi (returns payment URL)",
                 "consumes": [
                     "application/json"
                 ],
@@ -395,12 +316,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "payments"
+                    "Payments"
                 ],
-                "summary": "Создать платеж через Kaspi",
+                "summary": "Create Kaspi payment",
                 "parameters": [
                     {
-                        "description": "Данные платежа",
+                        "description": "Payment request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -433,7 +354,7 @@ const docTemplate = `{
         },
         "/api/payments/wallet": {
             "post": {
-                "description": "Создать и обработать платеж через кошелек",
+                "description": "Create payment using wallet balance",
                 "consumes": [
                     "application/json"
                 ],
@@ -441,12 +362,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "payments"
+                    "Payments"
                 ],
-                "summary": "Создать платеж через кошелек",
+                "summary": "Create wallet payment",
                 "parameters": [
                     {
-                        "description": "Данные платежа",
+                        "description": "Payment request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -467,9 +388,43 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
+                    }
+                }
+            }
+        },
+        "/api/payments/webhook/halyk": {
+            "post": {
+                "description": "Webhook endpoint for Halyk Bank payment notifications",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Halyk Bank webhook",
+                "parameters": [
+                    {
+                        "description": "Webhook request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.WebhookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SuccessResponse"
+                        }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
@@ -477,43 +432,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/payments/webhook/halyk": {
-            "post": {
-                "description": "Обработка callback от Halyk Bank",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "payments"
-                ],
-                "summary": "Webhook для Halyk Bank",
-                "parameters": [
-                    {
-                        "description": "Webhook данные",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.WebhookRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.SuccessResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/api/payments/webhook/kaspi": {
             "post": {
-                "description": "Обработка callback от Kaspi",
+                "description": "Webhook endpoint for Kaspi payment notifications",
                 "consumes": [
                     "application/json"
                 ],
@@ -521,12 +442,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "payments"
+                    "Payments"
                 ],
-                "summary": "Webhook для Kaspi",
+                "summary": "Kaspi webhook",
                 "parameters": [
                     {
-                        "description": "Webhook данные",
+                        "description": "Webhook request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -540,6 +461,12 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handler.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -547,17 +474,14 @@ const docTemplate = `{
         },
         "/api/payments/{id}/refund": {
             "post": {
-                "description": "Вернуть средства за платеж",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Refund a completed payment",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "payments"
+                    "Payments"
                 ],
-                "summary": "Вернуть платеж",
+                "summary": "Refund payment",
                 "parameters": [
                     {
                         "type": "string",
@@ -579,1399 +503,20 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants": {
-            "get": {
-                "description": "Получить список всех ресторанов с пагинацией",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Список ресторанов",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Количество записей",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Смещение",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Restaurant"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Создать новый ресторан",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Создать ресторан",
-                "parameters": [
-                    {
-                        "description": "Данные ресторана",
-                        "name": "restaurant",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.CreateRestaurantRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Restaurant"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}": {
-            "get": {
-                "description": "Получить информацию о ресторане по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Получить ресторан",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Restaurant"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Обновить информацию о ресторане",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Обновить ресторан",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Owner ID",
-                        "name": "owner_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для обновления",
-                        "name": "restaurant",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UpdateRestaurantRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Restaurant"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Удалить ресторан по ID (устанавливает is_active = false)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Удалить ресторан (soft delete)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Owner ID",
-                        "name": "owner_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}/bookings": {
-            "get": {
-                "description": "Получить все бронирования ресторана на определенную дату",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Получить бронирования ресторана",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Дата в формате YYYY-MM-DD",
-                        "name": "date",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Booking"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}/images": {
-            "post": {
-                "description": "Загрузить изображение для ресторана (mock upload)",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Добавить изображение к ресторану",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Owner ID",
-                        "name": "owner_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Файл изображения",
-                        "name": "image",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "default": false,
-                        "description": "Является ли главным изображением",
-                        "name": "is_main",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.RestaurantImage"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}/images/{image_id}": {
-            "delete": {
-                "description": "Удалить изображение ресторана по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "restaurants"
-                ],
-                "summary": "Удалить изображение ресторана",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Image ID",
-                        "name": "image_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Owner ID",
-                        "name": "owner_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}/managers": {
-            "get": {
-                "description": "Получить всех менеджеров ресторана",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "managers"
-                ],
-                "summary": "Получить список менеджеров ресторана",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.RestaurantManager"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Добавить пользователя в качестве менеджера ресторана (только владелец)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "managers"
-                ],
-                "summary": "Добавить менеджера к ресторану",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Owner ID",
-                        "name": "owner_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные менеджера",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.AddManagerRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.RestaurantManager"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}/managers/{user_id}": {
-            "delete": {
-                "description": "Удалить менеджера из ресторана (только владелец)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "managers"
-                ],
-                "summary": "Удалить менеджера из ресторана",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Owner ID",
-                        "name": "owner_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}/reviews": {
-            "get": {
-                "description": "Получить все отзывы определенного ресторана с пагинацией",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Получить отзывы ресторана",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Количество записей",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Смещение",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Review"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}/tables": {
-            "get": {
-                "description": "Получить все столы определенного ресторана",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tables"
-                ],
-                "summary": "Получить столы ресторана",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Table"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/reviews": {
-            "post": {
-                "description": "Создать новый отзыв о ресторане",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Создать отзыв",
-                "parameters": [
-                    {
-                        "description": "Данные отзыва",
-                        "name": "review",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.CreateReviewRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Review"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/reviews/{id}": {
-            "get": {
-                "description": "Получить информацию об отзыве по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Получить отзыв",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Review ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Review"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Обновить информацию об отзыве",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Обновить отзыв",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Review ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для обновления",
-                        "name": "review",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UpdateReviewRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Review"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Удалить отзыв по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Удалить отзыв",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Review ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tables": {
-            "post": {
-                "description": "Создать новый стол в ресторане",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tables"
-                ],
-                "summary": "Создать стол",
-                "parameters": [
-                    {
-                        "description": "Данные стола",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.CreateTableRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Table"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tables/available": {
-            "get": {
-                "description": "Получить доступные столы ресторана по минимальной вместимости",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tables"
-                ],
-                "summary": "Получить доступные столы",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Restaurant ID",
-                        "name": "restaurant_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "Минимальная вместимость",
-                        "name": "min_capacity",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Table"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tables/{id}": {
-            "get": {
-                "description": "Получить информацию о столе по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tables"
-                ],
-                "summary": "Получить стол",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Table ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Table"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Обновить информацию о столе",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tables"
-                ],
-                "summary": "Обновить стол",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Table ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для обновления",
-                        "name": "table",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UpdateTableRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Table"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Удалить стол по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tables"
-                ],
-                "summary": "Удалить стол",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Table ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/users": {
-            "post": {
-                "description": "Регистрация нового пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Создать пользователя",
-                "parameters": [
-                    {
-                        "description": "Данные пользователя",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.CreateUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/users/{id}": {
-            "get": {
-                "description": "Получить информацию о пользователе по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Получить пользователя",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/users/{user_id}/bookings": {
-            "get": {
-                "description": "Получить все бронирования определенного пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "bookings"
-                ],
-                "summary": "Получить бронирования пользователя",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Booking"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/users/{user_id}/reviews": {
-            "get": {
-                "description": "Получить все отзывы определенного пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Получить отзывы пользователя",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Review"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
                     }
                 }
             }
         },
         "/api/wallet": {
             "get": {
-                "description": "Получить информацию о кошельке пользователя",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Get or create wallet for a user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
-                "summary": "Получить кошелек",
+                "summary": "Get user wallet",
                 "parameters": [
                     {
                         "type": "string",
@@ -2005,7 +550,7 @@ const docTemplate = `{
         },
         "/api/wallet/deposit": {
             "post": {
-                "description": "Пополнить баланс кошелька пользователя",
+                "description": "Add funds to user's wallet",
                 "consumes": [
                     "application/json"
                 ],
@@ -2013,12 +558,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
-                "summary": "Пополнить кошелек",
+                "summary": "Deposit to wallet",
                 "parameters": [
                     {
-                        "description": "Данные для пополнения",
+                        "description": "Deposit request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2051,17 +596,14 @@ const docTemplate = `{
         },
         "/api/wallet/transactions": {
             "get": {
-                "description": "Получить историю транзакций кошелька",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Get transaction history for a user's wallet",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
-                "summary": "Получить историю транзакций",
+                "summary": "Get wallet transactions",
                 "parameters": [
                     {
                         "type": "string",
@@ -2112,7 +654,7 @@ const docTemplate = `{
         },
         "/api/wallet/withdraw": {
             "post": {
-                "description": "Вывести средства из кошелька пользователя",
+                "description": "Withdraw funds from user's wallet",
                 "consumes": [
                     "application/json"
                 ],
@@ -2120,12 +662,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "wallet"
+                    "Wallet"
                 ],
-                "summary": "Вывести средства из кошелька",
+                "summary": "Withdraw from wallet",
                 "parameters": [
                     {
-                        "description": "Данные для вывода",
+                        "description": "Withdraw request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2755,71 +1297,72 @@ const docTemplate = `{
                 "$ref": "#/definitions/domain.DaySchedule"
             }
         },
-        "handler.AddManagerRequest": {
-            "type": "object",
-            "required": [
-                "user_id"
-            ],
-            "properties": {
-                "user_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                }
-            }
-        },
-        "handler.AvailabilityResponse": {
+        "handler.BookingStatsResponse": {
             "type": "object",
             "properties": {
-                "available": {
-                    "type": "boolean"
-                },
-                "end_time": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "string"
-                },
-                "table_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.CreateBookingRequest": {
-            "type": "object",
-            "required": [
-                "booking_date",
-                "end_time",
-                "guests_count",
-                "restaurant_id",
-                "start_time",
-                "table_id",
-                "user_id"
-            ],
-            "properties": {
-                "booking_date": {
-                    "type": "string"
-                },
-                "end_time": {
-                    "type": "string"
-                },
-                "guests_count": {
-                    "type": "integer",
-                    "minimum": 1
-                },
                 "restaurant_id": {
                     "type": "string"
                 },
-                "special_note": {
+                "stats": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "handler.BulkNotificationRequest": {
+            "type": "object",
+            "required": [
+                "message",
+                "recipients",
+                "subject"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "recipients": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "subject": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CheckAvailabilityRequest": {
+            "type": "object",
+            "required": [
+                "end_time",
+                "start_time",
+                "table_ids"
+            ],
+            "properties": {
+                "end_time": {
                     "type": "string"
                 },
                 "start_time": {
                     "type": "string"
                 },
-                "table_id": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
+                "table_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "handler.ConcurrentAvailabilityResponse": {
+            "type": "object",
+            "properties": {
+                "availability": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
                 }
             }
         },
@@ -2839,154 +1382,6 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
-                }
-            }
-        },
-        "handler.CreateRestaurantRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "average_price",
-                "cuisine_type",
-                "max_combinable_tables",
-                "name",
-                "owner_id",
-                "phone",
-                "working_hours"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "average_price": {
-                    "type": "integer"
-                },
-                "cuisine_type": {
-                    "$ref": "#/definitions/domain.CuisineType"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "instagram": {
-                    "type": "string"
-                },
-                "latitude": {
-                    "type": "number"
-                },
-                "longitude": {
-                    "type": "number"
-                },
-                "max_combinable_tables": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "website": {
-                    "type": "string"
-                },
-                "working_hours": {
-                    "$ref": "#/definitions/domain.WorkingHours"
-                }
-            }
-        },
-        "handler.CreateReviewRequest": {
-            "type": "object",
-            "required": [
-                "rating",
-                "restaurant_id",
-                "user_id"
-            ],
-            "properties": {
-                "booking_id": {
-                    "type": "string"
-                },
-                "comment": {
-                    "type": "string"
-                },
-                "rating": {
-                    "type": "integer",
-                    "maximum": 5,
-                    "minimum": 1
-                },
-                "restaurant_id": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.CreateTableRequest": {
-            "type": "object",
-            "required": [
-                "location_type",
-                "max_capacity",
-                "min_capacity",
-                "restaurant_id",
-                "table_number"
-            ],
-            "properties": {
-                "location_type": {
-                    "$ref": "#/definitions/domain.LocationType"
-                },
-                "max_capacity": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "min_capacity": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "restaurant_id": {
-                    "type": "string"
-                },
-                "table_number": {
-                    "type": "string"
-                },
-                "x_position": {
-                    "type": "integer"
-                },
-                "y_position": {
-                    "type": "integer"
-                }
-            }
-        },
-        "handler.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "first_name",
-                "last_name",
-                "password",
-                "phone",
-                "role"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "role": {
-                    "$ref": "#/definitions/domain.UserRole"
                 }
             }
         },
@@ -3018,6 +1413,17 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.NotificationStatsResponse": {
+            "type": "object",
+            "properties": {
+                "failed": {
+                    "type": "integer"
+                },
+                "sent": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.PaymentWithURLResponse": {
             "type": "object",
             "properties": {
@@ -3029,73 +1435,52 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.SearchTablesRequest": {
+            "type": "object",
+            "required": [
+                "end_time",
+                "guest_count",
+                "restaurant_ids",
+                "start_time"
+            ],
+            "properties": {
+                "end_time": {
+                    "type": "string"
+                },
+                "guest_count": {
+                    "type": "integer"
+                },
+                "restaurant_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "start_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.SearchTablesResponse": {
+            "type": "object",
+            "properties": {
+                "results": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "handler.SuccessResponse": {
             "type": "object",
             "properties": {
                 "message": {
                     "type": "string",
                     "example": "operation successful"
-                }
-            }
-        },
-        "handler.UpdateBookingStatusRequest": {
-            "type": "object",
-            "required": [
-                "status"
-            ],
-            "properties": {
-                "status": {
-                    "$ref": "#/definitions/domain.BookingStatus"
-                }
-            }
-        },
-        "handler.UpdateRestaurantRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.UpdateReviewRequest": {
-            "type": "object",
-            "properties": {
-                "comment": {
-                    "type": "string"
-                },
-                "rating": {
-                    "type": "integer",
-                    "maximum": 5,
-                    "minimum": 1
-                }
-            }
-        },
-        "handler.UpdateTableRequest": {
-            "type": "object",
-            "properties": {
-                "is_active": {
-                    "type": "boolean"
-                },
-                "location_type": {
-                    "$ref": "#/definitions/domain.LocationType"
-                },
-                "x_position": {
-                    "type": "integer"
-                },
-                "y_position": {
-                    "type": "integer"
                 }
             }
         },

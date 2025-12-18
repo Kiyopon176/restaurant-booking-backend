@@ -101,6 +101,7 @@ func (s *BookingService) CheckMultipleTablesAvailability(
 	}, len(tableIDs))
 
 	var wg sync.WaitGroup
+	available := true
 
 	for _, tableID := range tableIDs {
 		wg.Add(1)

@@ -25,6 +25,16 @@ func NewConcurrentDemoHandler(
 	}
 }
 
+// @Summary Send bulk notifications
+// @Description Send notifications to multiple recipients concurrently
+// @Tags Demo - Concurrent Features
+// @Accept json
+// @Produce json
+// @Param request body BulkNotificationRequest true "Bulk notification request"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/demo/bulk-notifications [post]
 func (h *ConcurrentDemoHandler) SendBulkNotifications(c *gin.Context) {
 	var req BulkNotificationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -54,6 +64,12 @@ func (h *ConcurrentDemoHandler) SendBulkNotifications(c *gin.Context) {
 	})
 }
 
+// @Summary Get notification statistics
+// @Description Get statistics of sent and failed notifications
+// @Tags Demo - Concurrent Features
+// @Produce json
+// @Success 200 {object} NotificationStatsResponse
+// @Router /api/demo/notification-stats [get]
 func (h *ConcurrentDemoHandler) GetNotificationStats(c *gin.Context) {
 	sent, failed := h.notificationSvc.GetStats()
 
@@ -63,6 +79,15 @@ func (h *ConcurrentDemoHandler) GetNotificationStats(c *gin.Context) {
 	})
 }
 
+// @Summary Check multiple tables availability
+// @Description Check availability of multiple tables concurrently
+// @Tags Demo - Concurrent Features
+// @Accept json
+// @Produce json
+// @Param request body CheckAvailabilityRequest true "Check availability request"
+// @Success 200 {object} ConcurrentAvailabilityResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/demo/check-availability [post]
 func (h *ConcurrentDemoHandler) CheckTablesAvailability(c *gin.Context) {
 	var req CheckAvailabilityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -83,6 +108,15 @@ func (h *ConcurrentDemoHandler) CheckTablesAvailability(c *gin.Context) {
 	})
 }
 
+// @Summary Get booking statistics
+// @Description Get booking statistics for a restaurant (calculated in parallel)
+// @Tags Demo - Concurrent Features
+// @Produce json
+// @Param restaurant_id path string true "Restaurant ID"
+// @Success 200 {object} BookingStatsResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/demo/booking-stats/{restaurant_id} [get]
 func (h *ConcurrentDemoHandler) GetBookingStats(c *gin.Context) {
 	restaurantIDStr := c.Param("restaurant_id")
 	restaurantID, err := uuid.Parse(restaurantIDStr)
@@ -104,6 +138,15 @@ func (h *ConcurrentDemoHandler) GetBookingStats(c *gin.Context) {
 	})
 }
 
+// @Summary Search available tables across restaurants
+// @Description Search for available tables across multiple restaurants in parallel
+// @Tags Demo - Concurrent Features
+// @Accept json
+// @Produce json
+// @Param request body SearchTablesRequest true "Search tables request"
+// @Success 200 {object} SearchTablesResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/demo/search-tables [post]
 func (h *ConcurrentDemoHandler) SearchAvailableTables(c *gin.Context) {
 	var req SearchTablesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
