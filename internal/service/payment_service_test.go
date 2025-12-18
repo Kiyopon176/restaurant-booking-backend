@@ -101,7 +101,7 @@ func setupPaymentService() (*paymentService, *MockPaymentRepository, *MockWallet
 	mockPaymentRepo := new(MockPaymentRepository)
 	mockWalletService := new(MockWalletService)
 
-	sqlDB, mock, _ := sqlmock.New()
+	sqlDB, sqlMock, _ := sqlmock.New()
 	dialector := postgres.New(postgres.Config{
 		Conn:       sqlDB,
 		DriverName: "postgres",
@@ -114,18 +114,18 @@ func setupPaymentService() (*paymentService, *MockPaymentRepository, *MockWallet
 		db:            db,
 	}
 
-	return service, mockPaymentRepo, mockWalletService, mock, db
+	return service, mockPaymentRepo, mockWalletService, sqlMock, db
 }
 
 func TestCreatePayment_WalletPayment_Success(t *testing.T) {
-	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, mockWalletService, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	userID := uuid.New()
 	bookingID := uuid.New()
 	amount := 10000
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("Create", ctx, mock.AnythingOfType("*domain.Payment")).Return(nil)
 	mockPaymentRepo.On("GetByID", ctx, mock.AnythingOfType("uuid.UUID")).Return(&domain.Payment{
 		ID:            uuid.New(),
@@ -136,7 +136,7 @@ func TestCreatePayment_WalletPayment_Success(t *testing.T) {
 	}, nil)
 	mockWalletService.On("ChargeForBooking", ctx, userID, amount, bookingID).Return(nil)
 	mockPaymentRepo.On("Update", ctx, mock.AnythingOfType("*domain.Payment")).Return(nil)
-	mock.ExpectCommit()
+	sqlMock.ExpectCommit()
 
 	payment, err := service.CreatePayment(ctx, userID, amount, domain.PaymentMethodWallet, &bookingID)
 
@@ -158,7 +158,7 @@ func TestCreatePayment_InvalidAmount(t *testing.T) {
 }
 
 func TestProcessWalletPayment_Success(t *testing.T) {
-	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, mockWalletService, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	paymentID := uuid.New()
@@ -175,11 +175,11 @@ func TestProcessWalletPayment_Success(t *testing.T) {
 		PaymentStatus: domain.PaymentStatusPending,
 	}
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
 	mockWalletService.On("ChargeForBooking", ctx, userID, amount, bookingID).Return(nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
-	mock.ExpectCommit()
+	sqlMock.ExpectCommit()
 
 	err := service.ProcessWalletPayment(ctx, paymentID)
 
@@ -190,7 +190,7 @@ func TestProcessWalletPayment_Success(t *testing.T) {
 }
 
 func TestProcessWalletPayment_InsufficientBalance(t *testing.T) {
-	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, mockWalletService, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	paymentID := uuid.New()
@@ -206,11 +206,11 @@ func TestProcessWalletPayment_InsufficientBalance(t *testing.T) {
 		PaymentStatus: domain.PaymentStatusPending,
 	}
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
 	mockWalletService.On("ChargeForBooking", ctx, userID, 10000, bookingID).Return(ErrInsufficientBalance)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
-	mock.ExpectRollback()
+	sqlMock.ExpectRollback()
 
 	err := service.ProcessWalletPayment(ctx, paymentID)
 
@@ -270,7 +270,7 @@ func TestCreateKaspiPayment_Success(t *testing.T) {
 }
 
 func TestProcessExternalPaymentCallback_Success(t *testing.T) {
-	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, mockWalletService, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	externalID := "external-123"
@@ -286,11 +286,11 @@ func TestProcessExternalPaymentCallback_Success(t *testing.T) {
 		ExternalPaymentID: &externalID,
 	}
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByExternalID", ctx, externalID).Return(payment, nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 	mockWalletService.On("Deposit", ctx, userID, amount, mock.AnythingOfType("string")).Return(nil)
-	mock.ExpectCommit()
+	sqlMock.ExpectCommit()
 
 	err := service.ProcessExternalPaymentCallback(ctx, externalID, true)
 
@@ -301,7 +301,7 @@ func TestProcessExternalPaymentCallback_Success(t *testing.T) {
 }
 
 func TestProcessExternalPaymentCallback_Failed(t *testing.T) {
-	service, mockPaymentRepo, _, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, _, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	externalID := "external-123"
@@ -312,10 +312,10 @@ func TestProcessExternalPaymentCallback_Failed(t *testing.T) {
 		ExternalPaymentID: &externalID,
 	}
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByExternalID", ctx, externalID).Return(payment, nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
-	mock.ExpectCommit()
+	sqlMock.ExpectCommit()
 
 	err := service.ProcessExternalPaymentCallback(ctx, externalID, false)
 
@@ -326,7 +326,7 @@ func TestProcessExternalPaymentCallback_Failed(t *testing.T) {
 }
 
 func TestRefundPayment_Success(t *testing.T) {
-	service, mockPaymentRepo, mockWalletService, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, mockWalletService, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	paymentID := uuid.New()
@@ -342,11 +342,11 @@ func TestRefundPayment_Success(t *testing.T) {
 		PaymentStatus: domain.PaymentStatusCompleted,
 	}
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
 	mockWalletService.On("RefundBooking", ctx, userID, amount, bookingID, mock.AnythingOfType("string")).Return(nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
-	mock.ExpectCommit()
+	sqlMock.ExpectCommit()
 
 	err := service.RefundPayment(ctx, paymentID)
 
@@ -357,7 +357,7 @@ func TestRefundPayment_Success(t *testing.T) {
 }
 
 func TestRefundPayment_AlreadyRefunded(t *testing.T) {
-	service, mockPaymentRepo, _, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, _, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	paymentID := uuid.New()
@@ -366,9 +366,9 @@ func TestRefundPayment_AlreadyRefunded(t *testing.T) {
 		PaymentStatus: domain.PaymentStatusRefunded,
 	}
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
-	mock.ExpectCommit()
+	sqlMock.ExpectCommit()
 
 	err := service.RefundPayment(ctx, paymentID)
 
@@ -377,7 +377,7 @@ func TestRefundPayment_AlreadyRefunded(t *testing.T) {
 }
 
 func TestRefundPayment_InvalidStatus(t *testing.T) {
-	service, mockPaymentRepo, _, mock, _ := setupPaymentService()
+	service, mockPaymentRepo, _, sqlMock, _ := setupPaymentService()
 	ctx := context.Background()
 
 	paymentID := uuid.New()
@@ -386,9 +386,9 @@ func TestRefundPayment_InvalidStatus(t *testing.T) {
 		PaymentStatus: domain.PaymentStatusPending,
 	}
 
-	mock.ExpectBegin()
+	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
-	mock.ExpectRollback()
+	sqlMock.ExpectRollback()
 
 	err := service.RefundPayment(ctx, paymentID)
 
