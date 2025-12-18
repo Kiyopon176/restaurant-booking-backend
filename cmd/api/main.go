@@ -12,9 +12,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/restaurant-booking/pkg/logger"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.uber.org/zap"
+	"restaurant-booking/pkg/logger"
 
 	_ "restaurant-booking/docs"
 )
@@ -35,7 +36,7 @@ func main() {
 
 	db, err := database.InitDB(cfg)
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal("Failed to connect to database:", zap.Error(err))
 	}
 
 	log.Info("Successfully connected to database!")

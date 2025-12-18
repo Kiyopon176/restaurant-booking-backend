@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -55,7 +56,7 @@ func NewAuthService(
 func (s *authService) Register(email, password, firstName, lastName string, phone string, role domain.UserRole) (*domain.User, string, string, error) {
 
 	if !isValidEmail(email) {
-		s.log.Warn("invalid email address", zap.Any(ErrInvalidEmail))
+		s.log.Warn("invalid email address", zap.Error(ErrInvalidEmail))
 		return nil, "", "", ErrInvalidEmail
 	}
 

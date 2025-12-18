@@ -101,7 +101,6 @@ func (s *BookingService) CheckMultipleTablesAvailability(
 	}, len(tableIDs))
 
 	var wg sync.WaitGroup
-	available := true
 
 	for _, tableID := range tableIDs {
 		wg.Add(1)
@@ -111,7 +110,6 @@ func (s *BookingService) CheckMultipleTablesAvailability(
 			time.Sleep(50 * time.Millisecond)
 
 			available := true
-
 
 			resultsChan <- struct {
 				TableID   uuid.UUID
