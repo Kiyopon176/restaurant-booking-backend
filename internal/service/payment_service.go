@@ -51,6 +51,7 @@ func NewPaymentService(
 
 func (s *paymentService) CreatePayment(ctx context.Context, userID uuid.UUID, amount int, method domain.PaymentMethod, bookingID *uuid.UUID) (*domain.Payment, error) {
 	if amount <= 0 {
+		s.log.Warn("insufficient amount of money")
 		return nil, ErrInvalidAmount
 	}
 

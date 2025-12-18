@@ -55,6 +55,7 @@ func NewAuthService(
 func (s *authService) Register(email, password, firstName, lastName string, phone string, role domain.UserRole) (*domain.User, string, string, error) {
 
 	if !isValidEmail(email) {
+		s.log.Warn("invalid email address", zap.Any(ErrInvalidEmail))
 		return nil, "", "", ErrInvalidEmail
 	}
 

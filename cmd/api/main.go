@@ -36,7 +36,7 @@ func main() {
 
 	jwtManager := jwt.NewManager(cfg.JWTSecret, cfg.JWTAccessExpire, cfg.JWTRefreshExpire)
 
-	userRepo := repository.NewUserRepository(db, log)
+	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	restaurantRepo := repository.NewRestaurantRepository(db)
 	tableRepo := repository.NewTableRepository(db)
@@ -46,13 +46,13 @@ func main() {
 	walletRepo := repository.NewWalletRepository(db)
 	paymentRepo := repository.NewPaymentRepository(db)
 
-	authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtManager)
-	userService := service.NewUserService(userRepo)
-	restaurantService := service.NewRestaurantService(restaurantRepo, db)
-	walletService := service.NewWalletService(walletRepo, db)
-	paymentService := service.NewPaymentService(paymentRepo, walletService, db)
+	authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtManager, log)
+	userService := service.NewUserService(userRepo, log)
+	restaurantService := service.NewRestaurantService(restaurantRepo, db, log)
+	walletService := service.NewWalletService(walletRepo, db, log)
+	paymentService := service.NewPaymentService(paymentRepo, walletService, db, log)
 
-	managerService := service.NewManagerService(restaurantManagerRepo, restaurantRepo, userRepo)
+	managerService := service.NewManagerService(restaurantManagerRepo, restaurantRepo, userRepo, log)
 
 	authHandler := handler.NewAuthHandler(authService, userService)
 	userHandler := handler.NewUserHandler(userRepo)
