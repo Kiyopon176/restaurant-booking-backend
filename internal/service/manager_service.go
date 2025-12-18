@@ -5,6 +5,7 @@ import (
 	"errors"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
+	"restaurant-booking/pkg/logger"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,17 +31,20 @@ type managerService struct {
 	managerRepo    repository.RestaurantManagerRepository
 	restaurantRepo repository.RestaurantRepository
 	userRepo       repository.UserRepository
+	log            logger.Logger
 }
 
 func NewManagerService(
 	managerRepo repository.RestaurantManagerRepository,
 	restaurantRepo repository.RestaurantRepository,
 	userRepo repository.UserRepository,
+	log logger.Logger,
 ) ManagerService {
 	return &managerService{
 		managerRepo:    managerRepo,
 		restaurantRepo: restaurantRepo,
 		userRepo:       userRepo,
+		log:            log,
 	}
 }
 

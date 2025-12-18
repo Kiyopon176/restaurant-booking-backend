@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/migrations/000002_create_users_table.up.sql" value="cd5964ed-d610-4a54-ab77-b6f81f698348" />
-  </component>
-</project>

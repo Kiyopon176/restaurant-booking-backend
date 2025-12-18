@@ -5,6 +5,7 @@ import (
 	"errors"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
+	"restaurant-booking/pkg/logger"
 	"strings"
 
 	"github.com/google/uuid"
@@ -68,12 +69,14 @@ type RestaurantService interface {
 type restaurantService struct {
 	restaurantRepo repository.RestaurantRepository
 	db             *gorm.DB
+	log            logger.Logger
 }
 
-func NewRestaurantService(restaurantRepo repository.RestaurantRepository, db *gorm.DB) RestaurantService {
+func NewRestaurantService(restaurantRepo repository.RestaurantRepository, db *gorm.DB, log logger.Logger) RestaurantService {
 	return &restaurantService{
 		restaurantRepo: restaurantRepo,
 		db:             db,
+		log:            log,
 	}
 }
 

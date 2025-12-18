@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"restaurant-booking/internal/config"
 	"restaurant-booking/internal/database"
 	"restaurant-booking/internal/handler"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/restaurant-booking/pkg/logger"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -20,10 +20,11 @@ import (
 )
 
 func main() {
+	log, _ := logger.New("debug")
 
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal("Failed to load config:", err)
+		log.Fatal("Failed to load config:", zap.Error(err))
 	}
 
 	db, err := database.InitDB(cfg)
@@ -31,7 +32,7 @@ func main() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
-	fmt.Println("Successfully connected to database!")
+	log.Info("Successfully connected to database!")
 
 	jwtManager := jwt.NewManager(cfg.JWTSecret, cfg.JWTAccessExpire, cfg.JWTRefreshExpire)
 
@@ -45,13 +46,13 @@ func main() {
 	walletRepo := repository.NewWalletRepository(db)
 	paymentRepo := repository.NewPaymentRepository(db)
 
-	authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtManager)
-	userService := service.NewUserService(userRepo)
-	restaurantService := service.NewRestaurantService(restaurantRepo, db)
-	walletService := service.NewWalletService(walletRepo, db)
-	paymentService := service.NewPaymentService(paymentRepo, walletService, db)
+	authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtManager, log)
+	userService := service.NewUserService(userRepo, log)
+	restaurantService := service.NewRestaurantService(restaurantRepo, db, log)
+	walletService := service.NewWalletService(walletRepo, db, log)
+	paymentService := service.NewPaymentService(paymentRepo, walletService, db, log)
 
-	managerService := service.NewManagerService(restaurantManagerRepo, restaurantRepo, userRepo)
+	managerService := service.NewManagerService(restaurantManagerRepo, restaurantRepo, userRepo, log)
 
 	authHandler := handler.NewAuthHandler(authService, userService)
 	userHandler := handler.NewUserHandler(userRepo)
@@ -177,6 +178,6 @@ func main() {
 	fmt.Printf("Health check: http://localhost:%s/health\n", cfg.Port)
 
 	if err := r.Run(":" + cfg.Port); err != nil {
-		log.Fatal("Failed to start server:", err)
+		log.Fatal("Failed to start server:", zap.Error(err))
 	}
 }
