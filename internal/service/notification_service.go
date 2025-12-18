@@ -103,6 +103,10 @@ func (ns *NotificationService) Send(notification Notification) error {
 	select {
 	case <-ns.ctx.Done():
 		return fmt.Errorf("notification service is shutting down")
+	default:
+	}
+
+	select {
 	case ns.notifications <- notification:
 		log.Printf("Notification %s queued for sending", notification.ID)
 		return nil

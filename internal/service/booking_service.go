@@ -59,7 +59,7 @@ func (s *BookingService) CreateBookingWithNotification(
 			TableID:   tableID,
 			StartTime: startTime,
 			EndTime:   endTime,
-			Status:    "pending",
+			Status:    domain.BookingStatusPending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -108,6 +108,8 @@ func (s *BookingService) CheckMultipleTablesAvailability(
 			defer wg.Done()
 
 			time.Sleep(50 * time.Millisecond)
+
+			available := true
 
 			resultsChan <- struct {
 				TableID   uuid.UUID
