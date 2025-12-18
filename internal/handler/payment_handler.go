@@ -19,6 +19,15 @@ func NewPaymentHandler(paymentService service.PaymentService) *PaymentHandler {
 	return &PaymentHandler{paymentService: paymentService}
 }
 
+// @Summary Create wallet payment
+// @Description Create payment using wallet balance
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Param request body CreatePaymentRequest true "Payment request"
+// @Success 200 {object} domain.Payment
+// @Failure 400 {object} ErrorResponse
+// @Router /api/payments/wallet [post]
 func (h *PaymentHandler) CreateWalletPayment(c *gin.Context) {
 	var req CreatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -60,6 +69,16 @@ func (h *PaymentHandler) CreateWalletPayment(c *gin.Context) {
 	c.JSON(http.StatusOK, payment)
 }
 
+// @Summary Create Halyk Bank payment
+// @Description Create payment via Halyk Bank (returns payment URL)
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Param request body CreatePaymentRequest true "Payment request"
+// @Success 200 {object} PaymentWithURLResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/payments/halyk [post]
 func (h *PaymentHandler) CreateHalykPayment(c *gin.Context) {
 	var req CreatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -106,6 +125,16 @@ func (h *PaymentHandler) CreateHalykPayment(c *gin.Context) {
 	})
 }
 
+// @Summary Create Kaspi payment
+// @Description Create payment via Kaspi (returns payment URL)
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Param request body CreatePaymentRequest true "Payment request"
+// @Success 200 {object} PaymentWithURLResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/payments/kaspi [post]
 func (h *PaymentHandler) CreateKaspiPayment(c *gin.Context) {
 	var req CreatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -152,6 +181,15 @@ func (h *PaymentHandler) CreateKaspiPayment(c *gin.Context) {
 	})
 }
 
+// @Summary Halyk Bank webhook
+// @Description Webhook endpoint for Halyk Bank payment notifications
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Param request body WebhookRequest true "Webhook request"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/payments/webhook/halyk [post]
 func (h *PaymentHandler) HalykWebhook(c *gin.Context) {
 	var req WebhookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -172,10 +210,27 @@ func (h *PaymentHandler) HalykWebhook(c *gin.Context) {
 	c.JSON(http.StatusOK, SuccessResponse{Message: "ok"})
 }
 
+// @Summary Kaspi webhook
+// @Description Webhook endpoint for Kaspi payment notifications
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Param request body WebhookRequest true "Webhook request"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/payments/webhook/kaspi [post]
 func (h *PaymentHandler) KaspiWebhook(c *gin.Context) {
 	h.HalykWebhook(c)
 }
 
+// @Summary Refund payment
+// @Description Refund a completed payment
+// @Tags Payments
+// @Produce json
+// @Param id path string true "Payment ID"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/payments/{id}/refund [post]
 func (h *PaymentHandler) RefundPayment(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -192,6 +247,17 @@ func (h *PaymentHandler) RefundPayment(c *gin.Context) {
 	c.JSON(http.StatusOK, SuccessResponse{Message: "refunded"})
 }
 
+// @Summary Get user payments
+// @Description Get payment history for a user
+// @Tags Payments
+// @Produce json
+// @Param user_id query string true "User ID"
+// @Param limit query int false "Limit" default(10)
+// @Param offset query int false "Offset" default(0)
+// @Success 200 {array} domain.Payment
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/payments [get]
 func (h *PaymentHandler) GetUserPayments(c *gin.Context) {
 	userIDStr := c.Query("user_id")
 	if userIDStr == "" {

@@ -18,6 +18,15 @@ func NewWalletHandler(walletService service.WalletService) *WalletHandler {
 	return &WalletHandler{walletService: walletService}
 }
 
+// @Summary Get user wallet
+// @Description Get or create wallet for a user
+// @Tags Wallet
+// @Produce json
+// @Param user_id query string true "User ID"
+// @Success 200 {object} domain.Wallet
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/wallet [get]
 func (h *WalletHandler) GetWallet(c *gin.Context) {
 	userIDStr := c.Query("user_id")
 	if userIDStr == "" {
@@ -40,6 +49,16 @@ func (h *WalletHandler) GetWallet(c *gin.Context) {
 	c.JSON(http.StatusOK, wallet)
 }
 
+// @Summary Deposit to wallet
+// @Description Add funds to user's wallet
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Param request body DepositRequest true "Deposit request"
+// @Success 200 {object} domain.Wallet
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/wallet/deposit [post]
 func (h *WalletHandler) Deposit(c *gin.Context) {
 	var req DepositRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -66,6 +85,16 @@ func (h *WalletHandler) Deposit(c *gin.Context) {
 	c.JSON(http.StatusOK, wallet)
 }
 
+// @Summary Withdraw from wallet
+// @Description Withdraw funds from user's wallet
+// @Tags Wallet
+// @Accept json
+// @Produce json
+// @Param request body WithdrawRequest true "Withdraw request"
+// @Success 200 {object} domain.Wallet
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/wallet/withdraw [post]
 func (h *WalletHandler) Withdraw(c *gin.Context) {
 	var req WithdrawRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -95,6 +124,17 @@ func (h *WalletHandler) Withdraw(c *gin.Context) {
 	c.JSON(http.StatusOK, wallet)
 }
 
+// @Summary Get wallet transactions
+// @Description Get transaction history for a user's wallet
+// @Tags Wallet
+// @Produce json
+// @Param user_id query string true "User ID"
+// @Param limit query int false "Limit" default(10)
+// @Param offset query int false "Offset" default(0)
+// @Success 200 {array} domain.WalletTransaction
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/wallet/transactions [get]
 func (h *WalletHandler) GetTransactions(c *gin.Context) {
 	userIDStr := c.Query("user_id")
 	if userIDStr == "" {

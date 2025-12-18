@@ -12,13 +12,20 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/restaurant-booking/pkg/logger"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.uber.org/zap"
+	"restaurant-booking/pkg/logger"
 
 	_ "restaurant-booking/docs"
 )
 
+// @title Restaurant Booking API
+// @version 1.0
+// @description API для системы бронирования столиков в ресторанах
+// @host localhost:8080
+// @BasePath /
+// @schemes http
 func main() {
 	log, _ := logger.New("debug")
 
@@ -29,7 +36,7 @@ func main() {
 
 	db, err := database.InitDB(cfg)
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal("Failed to connect to database:", zap.Error(err))
 	}
 
 	log.Info("Successfully connected to database!")
@@ -65,6 +72,20 @@ func main() {
 	paymentHandler := handler.NewPaymentHandler(paymentService)
 
 	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
+
+	concurrentServices := SetupConcurrentServices(
+		refreshTokenRepo,
+		bookingRepo,
+		tableRepo,
+		restaurantRepo,
+	)
+
+	StartGracefulShutdown(concurrentServices)
+
+	concurrentDemoHandler := handler.NewConcurrentDemoHandler(
+		concurrentServices.NotificationSvc,
+		concurrentServices.BookingSvc,
+	)
 
 	r := gin.Default()
 
@@ -170,6 +191,15 @@ func main() {
 			payments.POST("/webhook/halyk", paymentHandler.HalykWebhook)
 			payments.POST("/webhook/kaspi", paymentHandler.KaspiWebhook)
 			payments.POST("/:id/refund", paymentHandler.RefundPayment)
+		}
+
+		demo := api.Group("/demo")
+		{
+			demo.POST("/bulk-notifications", concurrentDemoHandler.SendBulkNotifications)
+			demo.GET("/notification-stats", concurrentDemoHandler.GetNotificationStats)
+			demo.POST("/check-availability", concurrentDemoHandler.CheckTablesAvailability)
+			demo.GET("/booking-stats/:restaurant_id", concurrentDemoHandler.GetBookingStats)
+			demo.POST("/search-tables", concurrentDemoHandler.SearchAvailableTables)
 		}
 	}
 

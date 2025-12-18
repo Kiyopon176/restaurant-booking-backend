@@ -9,13 +9,13 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	tmock "github.com/stretchr/testify/mock"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type MockPaymentRepository struct {
-	mock.Mock
+	tmock.Mock
 }
 
 func (m *MockPaymentRepository) Create(ctx context.Context, payment *domain.Payment) error {
@@ -53,7 +53,7 @@ func (m *MockPaymentRepository) Update(ctx context.Context, payment *domain.Paym
 }
 
 type MockWalletService struct {
-	mock.Mock
+	tmock.Mock
 }
 
 func (m *MockWalletService) GetOrCreateWallet(ctx context.Context, userID uuid.UUID) (*domain.Wallet, error) {
@@ -344,7 +344,7 @@ func TestRefundPayment_Success(t *testing.T) {
 
 	sqlMock.ExpectBegin()
 	mockPaymentRepo.On("GetByID", ctx, paymentID).Return(payment, nil)
-	mockWalletService.On("RefundBooking", ctx, userID, amount, bookingID, mock.AnythingOfType("string")).Return(nil)
+	mockWalletService.On("RefundBooking", ctx, userID, amount, bookingID, tmock.AnythingOfType("string")).Return(nil)
 	mockPaymentRepo.On("Update", ctx, payment).Return(nil)
 	sqlMock.ExpectCommit()
 
