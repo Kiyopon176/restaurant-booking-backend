@@ -5,6 +5,7 @@ import (
 	"errors"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
+	"restaurant-booking/pkg/logger"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -30,12 +31,14 @@ type WalletService interface {
 type walletService struct {
 	walletRepo repository.WalletRepository
 	db         *gorm.DB
+	log        logger.Logger
 }
 
-func NewWalletService(walletRepo repository.WalletRepository, db *gorm.DB) WalletService {
+func NewWalletService(walletRepo repository.WalletRepository, db *gorm.DB, log logger.Logger) WalletService {
 	return &walletService{
 		walletRepo: walletRepo,
 		db:         db,
+		log:        log,
 	}
 }
 

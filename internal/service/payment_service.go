@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
+	"restaurant-booking/pkg/logger"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -31,17 +32,20 @@ type paymentService struct {
 	paymentRepo   repository.PaymentRepository
 	walletService WalletService
 	db            *gorm.DB
+	log           logger.Logger
 }
 
 func NewPaymentService(
 	paymentRepo repository.PaymentRepository,
 	walletService WalletService,
 	db *gorm.DB,
+	log logger.Logger,
 ) PaymentService {
 	return &paymentService{
 		paymentRepo:   paymentRepo,
 		walletService: walletService,
 		db:            db,
+		log:           log,
 	}
 }
 
