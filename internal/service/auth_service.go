@@ -6,6 +6,7 @@ import (
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
 	"restaurant-booking/pkg/jwt"
+	"restaurant-booking/pkg/logger"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,23 +35,27 @@ type authService struct {
 	userRepo         repository.UserRepository
 	refreshTokenRepo repository.RefreshTokenRepository
 	jwtManager       *jwt.Manager
+	log              logger.Logger
 }
 
 func NewAuthService(
 	userRepo repository.UserRepository,
 	refreshTokenRepo repository.RefreshTokenRepository,
 	jwtManager *jwt.Manager,
+	log logger.Logger,
 ) AuthService {
 	return &authService{
 		userRepo:         userRepo,
 		refreshTokenRepo: refreshTokenRepo,
 		jwtManager:       jwtManager,
+		log:              log,
 	}
 }
 
 func (s *authService) Register(email, password, firstName, lastName string, phone string, role domain.UserRole) (*domain.User, string, string, error) {
 
 	if !isValidEmail(email) {
+		s.log.Warn("invalid email address", zap.Any(ErrInvalidEmail))
 		return nil, "", "", ErrInvalidEmail
 	}
 

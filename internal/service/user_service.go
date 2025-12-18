@@ -4,6 +4,7 @@ import (
 	"errors"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
+	"restaurant-booking/pkg/logger"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -22,11 +23,13 @@ type UserService interface {
 
 type userService struct {
 	userRepo repository.UserRepository
+	log      logger.Logger
 }
 
-func NewUserService(userRepo repository.UserRepository) UserService {
+func NewUserService(userRepo repository.UserRepository, log logger.Logger) UserService {
 	return &userService{
 		userRepo: userRepo,
+		log:      log,
 	}
 }
 

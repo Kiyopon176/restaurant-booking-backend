@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"restaurant-booking/internal/domain"
 	"restaurant-booking/internal/repository"
+	"restaurant-booking/pkg/logger"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -31,22 +32,26 @@ type paymentService struct {
 	paymentRepo   repository.PaymentRepository
 	walletService WalletService
 	db            *gorm.DB
+	log           logger.Logger
 }
 
 func NewPaymentService(
 	paymentRepo repository.PaymentRepository,
 	walletService WalletService,
 	db *gorm.DB,
+	log logger.Logger,
 ) PaymentService {
 	return &paymentService{
 		paymentRepo:   paymentRepo,
 		walletService: walletService,
 		db:            db,
+		log:           log,
 	}
 }
 
 func (s *paymentService) CreatePayment(ctx context.Context, userID uuid.UUID, amount int, method domain.PaymentMethod, bookingID *uuid.UUID) (*domain.Payment, error) {
 	if amount <= 0 {
+		s.log.Warn("insufficient amount of money")
 		return nil, ErrInvalidAmount
 	}
 
